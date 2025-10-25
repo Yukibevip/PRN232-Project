@@ -4,11 +4,11 @@
 
     startChatBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        window.location.href = 'call.html';
+        window.location.href = '/User/calling';
     });
 
     signInBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        window.location.href = 'login.html';
+        window.location.href = '/User/login';
     });
 });
