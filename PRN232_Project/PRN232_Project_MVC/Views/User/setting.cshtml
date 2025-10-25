@@ -1,0 +1,104 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - ChatApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="~/css/setting.css" rel="stylesheet" />
+
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <a href="/Home/index" class="logo">ChatApp</a>
+            <nav class="main-nav">
+                <a href="/User/friend">Friends</a>
+                <a href="/User/setting" class="active">Settings</a>
+                <a href="/User/block">Block</a>
+                <a href="/User/login">Sign In</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h1>Settings</h1>
+        </div>
+
+        <form id="settings-form">
+            <div class="settings-card">
+                <div class="card-body">
+                    <!-- Profile Section -->
+                    <div class="form-section">
+                        <h2>Profile Information</h2>
+                        <div class="form-group avatar-group">
+                            <div class="avatar-preview" id="avatar-preview" style="background-image: url('https://picsum.photos/200');"></div>
+                            <div>
+                                <label for="avatar-upload" class="avatar-upload-btn" role="button" tabindex="0">Change Avatar</label>
+                                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="display-name">Display Name</label>
+                            <input type="text" id="display-name" value="RandomUser123">
+                        </div>
+                        <div class="form-group">
+                            <label for="about-me">About Me</label>
+                            <textarea id="about-me" placeholder="Tell us something about yourself..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Preferences Section -->
+                    <div class="form-section">
+                        <h2>Preferences</h2>
+                        <div class="form-group">
+                            <label for="language">Language</label>
+                            <select id="language">
+                                <option>English</option>
+                                <option>Spanish</option>
+                                <option>French</option>
+                                <option>German</option>
+                            </select>
+                        </div>
+                        <div class="toggle-group">
+                            <label for="dark-mode-toggle">Dark Mode</label>
+                            <label class="switch">
+                                <input type="checkbox" id="dark-mode-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Section -->
+                    <div class="form-section">
+                        <h2>Privacy</h2>
+                        <div class="toggle-group">
+                            <label for="show-age-gender">Allow strangers to see my age/gender</label>
+                            <label class="switch">
+                                <input type="checkbox" id="show-age-gender" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <div id="snackbar" class="snackbar">Settings saved!</div>
+
+    <script src="~/js/setting.js"></script>
+</body>
+</html>
