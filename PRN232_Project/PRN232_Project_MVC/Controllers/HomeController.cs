@@ -15,7 +15,7 @@ namespace PRN232_Project_MVC.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return View("~/Views/User/landingPage.cshtml");
         }
 
         public IActionResult Privacy()

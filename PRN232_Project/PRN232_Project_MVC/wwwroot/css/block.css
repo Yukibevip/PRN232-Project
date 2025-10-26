@@ -1,0 +1,230 @@
+﻿:root {
+    --primary: #3366FF;
+    --accent: #00C2A8;
+    --soft: #F6F8FF;
+    --dark: #1a1a1a;
+    --light: #ffffff;
+    --grey: #6b7280;
+    --danger: #ef4444;
+    --border: #e5e7eb;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--soft);
+    color: var(--dark);
+}
+
+/* New Header */
+.main-header {
+    background-color: var(--light);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0; /* Short header */
+    width: 100%;
+}
+
+.header-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.main-nav a {
+    color: var(--grey);
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+    .main-nav a:hover {
+        color: var(--primary);
+    }
+
+    .main-nav a.active {
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+    .header-actions h2 {
+        font-size: 1.25rem;
+    }
+
+.btn-clear-all {
+    background-color: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+    .btn-clear-all:hover {
+        background-color: rgba(239, 68, 68, 0.1);
+    }
+
+.blocked-list {
+    list-style: none;
+    background-color: var(--light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.blocked-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+    .blocked-item:last-child {
+        border-bottom: none;
+    }
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    object-fit: cover;
+}
+
+.blocked-info {
+    flex-grow: 1;
+}
+
+.blocked-name {
+    font-weight: 700;
+}
+
+.blocked-details {
+    color: var(--grey);
+    font-size: 0.9rem;
+}
+
+.btn-unblock {
+    background-color: var(--primary);
+    color: var(--light);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--grey);
+    background: var(--light);
+    border-radius: var(--radius);
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+    .modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+
+.modal {
+    background-color: var(--light);
+    padding: 2rem;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal {
+    transform: scale(1);
+}
+
+.modal-header {
+    margin-bottom: 1rem;
+}
+
+    .modal-header h3 {
+        font-size: 1.5rem;
+    }
+
+.modal-body {
+    margin-bottom: 1.5rem;
+    color: var(--grey);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.modal-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+    .modal-btn.cancel {
+        background-color: var(--border);
+    }
+
+    .modal-btn.confirm {
+        background-color: var(--danger);
+        color: var(--light);
+    }
