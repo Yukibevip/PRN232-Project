@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PRN232_Project_MVC.Models;
+using Services;
+using Services.Interfaces;
 
 namespace PRN232_Project_MVC
 {
@@ -9,10 +11,17 @@ namespace PRN232_Project_MVC
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            builder.Services.AddDbContext<CallioTestContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("MyCallioDB")));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddScoped<IAccusationService, AccusationService>();
+            builder.Services.AddScoped<IBlockListService, BlockListService>();
+            builder.Services.AddScoped<IFriendInvitationService, FriendInvitationService>();
+            builder.Services.AddScoped<IFriendListService, FriendListService>();
+            builder.Services.AddScoped<ILogService, LogService>();
+            builder.Services.AddScoped<IMessageService, MessageService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();
 
