@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using BusinessObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 
-namespace PRN232_Project_MVC.Models;
+namespace DataAccessObjects;
 
 public partial class CallioTestContext : DbContext
 {
