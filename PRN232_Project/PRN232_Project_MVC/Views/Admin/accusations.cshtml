@@ -1,0 +1,780 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tố Cáo - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            color: #374151;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #FFFFFF;
+            padding: 24px 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .header h1 {
+                font-size: 28px;
+                font-weight: 700;
+                color: #374151;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 20px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #FFFFFF;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .nav-btn:hover {
+                background: #00C2A8;
+                color: #FFFFFF;
+                transform: translateY(-2px);
+            }
+
+            .nav-btn.active {
+                background: linear-gradient(135deg, #00C2A8, #00D4B4);
+                color: #FFFFFF;
+            }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #FFFFFF;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 30px rgba(239, 68, 68, 0.2);
+            }
+
+            .stat-card h3 {
+                font-size: 14px;
+                color: #6b7280;
+                font-weight: 600;
+                margin-bottom: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+            .stat-change.positive {
+                color: #00C2A8;
+            }
+
+            .stat-change.negative {
+                color: #ef4444;
+            }
+
+        .card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 28px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+            .card-header h2 {
+                font-size: 22px;
+                font-weight: 700;
+                color: #374151;
+            }
+
+        .search-filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+            .search-box input {
+                width: 100%;
+                padding: 12px 16px 12px 44px;
+                border: 2px solid #e5e7eb;
+                border-radius: 10px;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            }
+
+                .search-box input:focus {
+                    outline: none;
+                    border-color: #00C2A8;
+                    box-shadow: 0 0 0 3px rgba(0, 194, 168, 0.1);
+                }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #FFFFFF;
+            color: #374151;
+            transition: all 0.3s ease;
+        }
+
+            .filter-select:focus {
+                outline: none;
+                border-color: #00C2A8;
+            }
+
+        .btn-primary {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3366FF, #6FA3FF);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(51, 102, 255, 0.3);
+            }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #FFFFFF;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            tbody tr:hover {
+                background: #f9fafb;
+            }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00C2A8, #00D4B4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+            .user-avatar.accused {
+                background: linear-gradient(135deg, #ef4444, #f97316);
+            }
+
+        .user-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .reason-cell {
+            max-width: 300px;
+        }
+
+        .reason-text {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+
+            .priority-badge.high {
+                background: #fee2e2;
+                color: #ef4444;
+            }
+
+            .priority-badge.medium {
+                background: #fef3c7;
+                color: #f59e0b;
+            }
+
+            .priority-badge.low {
+                background: #dbeafe;
+                color: #3366FF;
+            }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+            .badge.pending {
+                background: #fef3c7;
+                color: #f59e0b;
+            }
+
+            .badge.reviewed {
+                background: #dbeafe;
+                color: #3366FF;
+            }
+
+            .badge.resolved {
+                background: #d1fae5;
+                color: #00C2A8;
+            }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-review {
+            background: #dbeafe;
+            color: #3366FF;
+        }
+
+            .btn-review:hover {
+                background: #3366FF;
+                color: #FFFFFF;
+            }
+
+        .btn-resolve {
+            background: #d1fae5;
+            color: #00C2A8;
+        }
+
+            .btn-resolve:hover {
+                background: #00C2A8;
+                color: #FFFFFF;
+            }
+
+        .btn-reject {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+            .btn-reject:hover {
+                background: #ef4444;
+                color: #FFFFFF;
+            }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+            .pagination button {
+                padding: 10px 16px;
+                border: 1px solid #e5e7eb;
+                background: #FFFFFF;
+                color: #374151;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+                .pagination button:hover:not(:disabled) {
+                    background: #00C2A8;
+                    color: #FFFFFF;
+                    border-color: #00C2A8;
+                }
+
+                .pagination button.active {
+                    background: linear-gradient(135deg, #00C2A8, #00D4B4);
+                    color: #FFFFFF;
+                    border-color: transparent;
+                }
+
+                .pagination button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="header-icon">⚠️</span>
+                Quản Lý Tố Cáo
+            </h1>
+            <nav class="nav-menu">
+                <a href="users.html" class="nav-btn">👥 Người Dùng</a>
+                <a href="friendlist.html" class="nav-btn">🤝 Bạn Bè</a>
+                <a href="accusations.html" class="nav-btn active">⚠️ Tố Cáo</a>
+                <a href="logs.html" class="nav-btn">📊 Nhật Ký</a>
+            </nav>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Tổng Tố Cáo</h3>
+                <div class="stat-value">3,456</div>
+                <div class="stat-change negative">
+                    ↑ +23.5% so với tháng trước
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>Đang Chờ Xử Lý</h3>
+                <div class="stat-value">1,234</div>
+                <div class="stat-change negative">
+                    ↑ +15.7% so với tháng trước
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>Đang Xem Xét</h3>
+                <div class="stat-value">876</div>
+                <div class="stat-change positive">
+                    ↓ -8.2% so với tháng trước
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>Đã Giải Quyết</h3>
+                <div class="stat-value">1,346</div>
+                <div class="stat-change positive">
+                    ↑ +34.1% so với tháng trước
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Danh Sách Tố Cáo</h2>
+            </div>
+
+            <div class="search-filter-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Tìm kiếm tố cáo...">
+                </div>
+                <select class="filter-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="pending">Đang chờ</option>
+                    <option value="reviewed">Đang xem xét</option>
+                    <option value="resolved">Đã giải quyết</option>
+                </select>
+                <select class="filter-select">
+                    <option value="">Mức độ ưu tiên</option>
+                    <option value="high">Cao</option>
+                    <option value="medium">Trung bình</option>
+                    <option value="low">Thấp</option>
+                </select>
+                <select class="filter-select">
+                    <option value="">Sắp xếp theo</option>
+                    <option value="newest">Mới nhất</option>
+                    <option value="oldest">Cũ nhất</option>
+                    <option value="priority">Mức độ ưu tiên</option>
+                </select>
+                <button class="btn-primary">
+                    📊 Xuất Báo Cáo
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Người Tố Cáo</th>
+                            <th>Người Bị Tố Cáo</th>
+                            <th>Lý Do</th>
+                            <th>Trạng Thái</th>
+                            <th>Ngày Tạo</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>#1234</strong></td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">NT</div>
+                                    <div class="user-info">
+                                        <h4>Nguyễn Văn Thành</h4>
+                                        <p>thanh.nguyen@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar accused">HQ</div>
+                                    <div class="user-info">
+                                        <h4>Hoàng Minh Quân</h4>
+                                        <p>quan.hoang@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="reason-cell">
+                                <div class="priority-badge high">CAO</div>
+                                <div class="reason-text">Gửi nội dung spam liên tục, quấy rối và sử dụng ngôn từ không phù hợp trong cuộc trò chuyện.</div>
+                            </td>
+                            <td><span class="badge pending">Đang chờ</span></td>
+                            <td>23/04/2024 14:30</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-review">Xem xét</button>
+                                    <button class="btn-action btn-resolve">Giải quyết</button>
+                                    <button class="btn-action btn-reject">Từ chối</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#1233</strong></td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">LA</div>
+                                    <div class="user-info">
+                                        <h4>Lê Thị Anh</h4>
+                                        <p>anh.le@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar accused">TV</div>
+                                    <div class="user-info">
+                                        <h4>Trần Minh Vũ</h4>
+                                        <p>vu.tran@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="reason-cell">
+                                <div class="priority-badge medium">TRUNG BÌNH</div>
+                                <div class="reason-text">Chia sẻ thông tin cá nhân của người khác mà không được phép.</div>
+                            </td>
+                            <td><span class="badge reviewed">Đang xem xét</span></td>
+                            <td>23/04/2024 10:15</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-review">Xem xét</button>
+                                    <button class="btn-action btn-resolve">Giải quyết</button>
+                                    <button class="btn-action btn-reject">Từ chối</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#1232</strong></td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">PH</div>
+                                    <div class="user-info">
+                                        <h4>Phạm Thị Hương</h4>
+                                        <p>huong.pham@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar accused">ĐM</div>
+                                    <div class="user-info">
+                                        <h4>Đỗ Văn Minh</h4>
+                                        <p>minh.do@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="reason-cell">
+                                <div class="priority-badge high">CAO</div>
+                                <div class="reason-text">Đe dọa và hành vi bắt nạt trực tuyến, gây tổn hại tinh thần.</div>
+                            </td>
+                            <td><span class="badge pending">Đang chờ</span></td>
+                            <td>22/04/2024 16:45</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-review">Xem xét</button>
+                                    <button class="btn-action btn-resolve">Giải quyết</button>
+                                    <button class="btn-action btn-reject">Từ chối</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#1231</strong></td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">BL</div>
+                                    <div class="user-info">
+                                        <h4>Bùi Thị Lan</h4>
+                                        <p>lan.bui@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar accused">VT</div>
+                                    <div class="user-info">
+                                        <h4>Vũ Đức Thắng</h4>
+                                        <p>thang.vu@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="reason-cell">
+                                <div class="priority-badge low">THẤP</div>
+                                <div class="reason-text">Sử dụng hình ảnh profile không phù hợp với cộng đồng.</div>
+                            </td>
+                            <td><span class="badge resolved">Đã giải quyết</span></td>
+                            <td>22/04/2024 09:20</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-review">Xem xét</button>
+                                    <button class="btn-action btn-resolve">Giải quyết</button>
+                                    <button class="btn-action btn-reject">Từ chối</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#1230</strong></td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">NK</div>
+                                    <div class="user-info">
+                                        <h4>Ngô Thị Kim</h4>
+                                        <p>kim.ngo@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar accused">LH</div>
+                                    <div class="user-info">
+                                        <h4>Lý Văn Hùng</h4>
+                                        <p>hung.ly@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="reason-cell">
+                                <div class="priority-badge medium">TRUNG BÌNH</div>
+                                <div class="reason-text">Quảng cáo dịch vụ không được phép trong tin nhắn cá nhân.</div>
+                            </td>
+                            <td><span class="badge reviewed">Đang xem xét</span></td>
+                            <td>21/04/2024 13:50</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-review">Xem xét</button>
+                                    <button class="btn-action btn-resolve">Giải quyết</button>
+                                    <button class="btn-action btn-reject">Từ chối</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#1229</strong></td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">ĐH</div>
+                                    <div class="user-info">
+                                        <h4>Đặng Thị Hà</h4>
+                                        <p>ha.dang@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar accused">PT</div>
+                                    <div class="user-info">
+                                        <h4>Phan Minh Tuấn</h4>
+                                        <p>tuan.phan@email.com</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="reason-cell">
+                                <div class="priority-badge high">CAO</div>
+                                <div class="reason-text">Lừa đảo và yêu cầu chuyển tiền với lý do không chính đáng.</div>
+                            </td>
+                            <td><span class="badge resolved">Đã giải quyết</span></td>
+                            <td>21/04/2024 08:30</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-review">Xem xét</button>
+                                    <button class="btn-action btn-resolve">Giải quyết</button>
+                                    <button class="btn-action btn-reject">Từ chối</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <button disabled>← Trước</button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>4</button>
+                <button>5</button>
+                <button>Sau →</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
