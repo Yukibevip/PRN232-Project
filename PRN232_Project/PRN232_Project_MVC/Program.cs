@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using PRN232_Project_MVC.Models;
+
 namespace PRN232_Project_MVC
 {
     public class Program
@@ -5,6 +8,8 @@ namespace PRN232_Project_MVC
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            builder.Services.AddDbContext<CallioTestContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("MyCallioDB")));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
