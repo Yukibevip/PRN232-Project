@@ -40,7 +40,15 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
-
+            //db connection
+            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
+            builder.Services.AddDbContext<CallioTestContext>(options =>
+            options.UseSqlServer(connectionString));
+            //end db connection
+            // Add Swagger for API testing
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            // End Swagger configuration
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

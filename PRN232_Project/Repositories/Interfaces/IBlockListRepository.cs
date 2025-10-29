@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,7 @@ namespace Repositories.Interfaces
 {
     public interface IBlockListRepository
     {
+        Task BlockUser(BlockList block);
+        Task UnblockUser(Guid blockerId, Guid blockedId);
     }
 }
