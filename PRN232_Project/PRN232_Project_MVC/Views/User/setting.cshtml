@@ -1,104 +1,174 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using System.Text.Json
+@using BusinessObjects
 @{
+    ViewBag.Title = "Settings";
+
+    // Get display name from session (used in header)
+    var userJson = Context.Session.GetString("User");
+    string? displayName = null;
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(userJson);
+            if (doc.RootElement.TryGetProperty("FullName", out var fn) && fn.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(fn.GetString()))
+                displayName = fn.GetString();
+            else if (doc.RootElement.TryGetProperty("Username", out var un))
+                displayName = un.GetString();
+        }
+        catch { displayName = null; }
+    }
+
+    // User object provided by controller (full profile). Fallback to minimal info from session.
+    BusinessObjects.User? user = null;
+    if (ViewBag.User is BusinessObjects.User u) user = u;
+    else if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            // session stored minimal info earlier: { UserId, Username, FullName }
+            using var doc = JsonDocument.Parse(userJson);
+            user = new BusinessObjects.User
+            {
+                Username = doc.RootElement.TryGetProperty("Username", out var un2) ? un2.GetString() ?? string.Empty : string.Empty,
+                FullName = doc.RootElement.TryGetProperty("FullName", out var fn2) ? fn2.GetString() ?? string.Empty : string.Empty
+            };
+        }
+        catch { user = null; }
+    }
+
+    string avatarUrl = user?.AvatarUrl ?? "/images/default-avatar.png";
+    var usernameDisplay = user?.Username ?? displayName ?? "User";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - ChatApp</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - ChatApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link href="~/css/setting.css" rel="stylesheet" />
-
 </head>
 <body>
     <header class="main-header">
         <div class="header-container">
-            <a href="/Home/index" class="logo">ChatApp</a>
+            <a href="~/" class="logo">ChatApp</a>
             <nav class="main-nav">
-                <a href="/User/friend">Friends</a>
-                <a href="/User/setting" class="active">Settings</a>
-                <a href="/User/block">Block</a>
-                <a href="/User/login">Sign In</a>
+                <div class="nav-group">
+                    <a href="/User/friend">Friends</a>
+                    <a href="/User/setting" class="active">Settings</a>
+                    <a href="/User/block">Block</a>
+                </div>
+
+                @if (!string.IsNullOrEmpty(usernameDisplay))
+                {
+                    <div class="user-actions">
+                        <span class="user-greeting">@usernameDisplay</span>
+                        <form method="post" asp-controller="User" asp-action="Logout" class="logout-form">
+                            <button type="submit" class="btn-logout">Log out</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a href="@Url.Action("login", "User")">Sign In</a>
+                }
             </nav>
         </div>
     </header>
 
     <main class="container">
-        <div class="page-header">
-            <h1>Settings</h1>
-        </div>
-
-        <form id="settings-form">
+        <div class="settings-container">
             <div class="settings-card">
-                <div class="card-body">
-                    <!-- Profile Section -->
-                    <div class="form-section">
-                        <h2>Profile Information</h2>
-                        <div class="form-group avatar-group">
-                            <div class="avatar-preview" id="avatar-preview" style="background-image: url('https://picsum.photos/200');"></div>
-                            <div>
-                                <label for="avatar-upload" class="avatar-upload-btn" role="button" tabindex="0">Change Avatar</label>
-                                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                <h2 class="settings-title">Account Settings</h2>
+
+                @if (ViewBag.Message != null)
+                {
+                    <div class="alert alert-success">@ViewBag.Message</div>
+                }
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger">@ViewBag.Error</div>
+                }
+
+                <form method="post" enctype="multipart/form-data" asp-controller="User" asp-action="UpdateProfile" class="settings-form">
+                    @Html.AntiForgeryToken()
+                    <div class="settings-flex">
+                        <div class="avatar-section">
+                            <div class="avatar-preview" id="avatar-preview" style="background-image: url('@avatarUrl');"></div>
+                            <label for="avatar" class="avatar-upload-btn">Choose Image</label>
+                            <input type="file" id="avatar" name="avatar" accept="image/*" class="avatar-input" />
+                        </div>
+                        <div class="info-section">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" value="@(user?.Username ?? "")" disabled />
+                            </div>
+                            <div class="form-group">
+                                <label for="fullname">Full name</label>
+                                <input type="text" id="fullname" name="fullname" value="@(user?.FullName ?? "")" />
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" value="@(user?.Email ?? "")" />
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-save">Save changes</button>
+                                <a class="btn-cancel" href="~/">Cancel</a>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="display-name">Display Name</label>
-                            <input type="text" id="display-name" value="RandomUser123">
-                        </div>
-                        <div class="form-group">
-                            <label for="about-me">About Me</label>
-                            <textarea id="about-me" placeholder="Tell us something about yourself..."></textarea>
-                        </div>
                     </div>
-
-                    <!-- Preferences Section -->
-                    <div class="form-section">
-                        <h2>Preferences</h2>
-                        <div class="form-group">
-                            <label for="language">Language</label>
-                            <select id="language">
-                                <option>English</option>
-                                <option>Spanish</option>
-                                <option>French</option>
-                                <option>German</option>
-                            </select>
-                        </div>
-                        <div class="toggle-group">
-                            <label for="dark-mode-toggle">Dark Mode</label>
-                            <label class="switch">
-                                <input type="checkbox" id="dark-mode-toggle">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Privacy Section -->
-                    <div class="form-section">
-                        <h2>Privacy</h2>
-                        <div class="toggle-group">
-                            <label for="show-age-gender">Allow strangers to see my age/gender</label>
-                            <label class="switch">
-                                <input type="checkbox" id="show-age-gender" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    <button type="submit" class="btn-save">Save Changes</button>
-                </div>
+                </form>
             </div>
-        </form>
+        </div>
     </main>
 
-    <div id="snackbar" class="snackbar">Settings saved!</div>
+    <div id="snackbar" class="snackbar" aria-live="polite" aria-atomic="true" style="display:none;">Settings saved!</div>
 
-    <script src="~/js/setting.js"></script>
+    <script>
+        // Avatar preview
+        (function () {
+            const input = document.getElementById('avatar');
+            const preview = document.getElementById('avatar-preview');
+
+            if (!input || !preview) return;
+
+            input.addEventListener('change', function (e) {
+                const file = this.files && this.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    preview.style.backgroundImage = `url('${ev.target.result}')`;
+                };
+                reader.readAsDataURL(file);
+            });
+        })();
+
+        // Snackbar for server messages (if server returned a message element)
+        (function () {
+            const success = @((ViewBag.Message != null) ? "true" : "false").ToString().ToLower();
+            const error = @((ViewBag.Error != null) ? "true" : "false").ToString().ToLower();
+            const snackbar = document.getElementById('snackbar');
+
+            if (!snackbar) return;
+
+            if (success === 'true') {
+                snackbar.textContent = '@(ViewBag.Message ?? "")';
+                snackbar.className = 'snackbar show success';
+                snackbar.style.display = 'block';
+                setTimeout(() => { snackbar.className = 'snackbar'; snackbar.style.display = 'none'; }, 3000);
+            }
+            else if (error === 'true') {
+                snackbar.textContent = '@(ViewBag.Error ?? "")';
+                snackbar.className = 'snackbar show error';
+                snackbar.style.display = 'block';
+                setTimeout(() => { snackbar.className = 'snackbar'; snackbar.style.display = 'none'; }, 4000);
+            }
+        })();
+    </script>
 </body>
 </html>

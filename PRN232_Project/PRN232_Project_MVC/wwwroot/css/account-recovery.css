@@ -1,0 +1,126 @@
+﻿:root {
+    --primary: #3366FF;
+    --accent: #00C2A8;
+    --soft: #F6F8FF;
+    --dark: #1a1a1a;
+    --light: #ffffff;
+    --grey: #6b7280;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--soft);
+    color: var(--dark);
+    min-height: 100vh;
+}
+
+.recovery-container {
+    max-width: 400px;
+    margin: 3rem auto 0 auto;
+    background: var(--light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2.5rem 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.recovery-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.recovery-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+    .form-group label {
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .form-group input[type="email"],
+    .form-group input[type="text"],
+    .form-group input[type="password"] {
+        padding: 0.7rem 1rem;
+        border: 1px solid var(--grey);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        background: var(--soft);
+        color: var(--dark);
+        transition: border 0.2s;
+    }
+
+    .form-group input:focus {
+        border: 1.5px solid var(--primary);
+        outline: none;
+    }
+
+.btn-primary {
+    background: linear-gradient(90deg, var(--accent), #00d4b4);
+    color: var(--light);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.8rem 0;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow);
+}
+
+    .btn-primary:hover, .btn-primary:focus {
+        background: linear-gradient(90deg, #00bfa3, #00e6c3);
+    }
+
+.alert {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.alert-danger {
+    background: #ffeaea;
+    color: #d32f2f;
+    border: 1px solid #ffbdbd;
+}
+
+.alert-success {
+    background: #eafff3;
+    color: #1e7e34;
+    border: 1px solid #b7ffd6;
+}
+
+.recovery-link {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.98rem;
+}
+
+    .recovery-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .recovery-link a:hover {
+            text-decoration: underline;
+        }

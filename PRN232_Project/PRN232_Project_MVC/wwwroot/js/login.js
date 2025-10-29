@@ -17,35 +17,38 @@
             formSections.forEach(form => {
                 form.classList.remove('active');
             });
-            document.getElementById(`${target}-form`).classList.add('active');
+            const targetForm = document.getElementById(`${target}-form`);
+            if (targetForm) targetForm.classList.add('active');
         });
     });
 
-    // Form validation and submission
+    // Form validation and submission (validate client-side then allow normal POST)
     const signInForm = document.getElementById('signin-form');
     const signUpForm = document.getElementById('signup-form');
 
-    signInForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (validateForm(this)) {
-            // Mock successful login
-            showToast('Login Successful!', 'success');
-            setTimeout(() => {
-                window.location.href = 'call.html';
-            }, 1500);
-        }
-    });
+    if (signInForm) {
+        signInForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (validateForm(this)) {
+                // allow server-side handling
+                this.submit();
+            } else {
+                showToast('Please fix the highlighted fields.', 'error');
+            }
+        });
+    }
 
-    signUpForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (validateForm(this)) {
-            // Mock successful sign up
-            showToast('Account Created Successfully!', 'success');
-            setTimeout(() => {
-                window.location.href = 'call.html';
-            }, 1500);
-        }
-    });
+    if (signUpForm) {
+        signUpForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (validateForm(this)) {
+                // allow server-side handling
+                this.submit();
+            } else {
+                showToast('Please fix the highlighted fields.', 'error');
+            }
+        });
+    }
 
     function validateForm(form) {
         let isValid = true;
@@ -61,10 +64,10 @@
         if (form.id === 'signup-form') {
             const password = form.querySelector('#signup-password');
             const confirmPassword = form.querySelector('#signup-confirm-password');
-            if (password.value !== confirmPassword.value) {
+            if (password && confirmPassword && password.value !== confirmPassword.value) {
                 showError(confirmPassword, 'Passwords do not match.');
                 isValid = false;
-            } else {
+            } else if (confirmPassword) {
                 hideError(confirmPassword);
             }
         }
@@ -86,7 +89,7 @@
         }
 
         // Email
-        if (input.type === 'email' && !/\S+@\S+\.\S+/.test(input.value)) {
+        if (input.type === 'email' && input.value && !/\S+@\S+\.\S+/.test(input.value)) {
             showError(input, 'Please enter a valid email.');
             valid = false;
         }
@@ -117,15 +120,18 @@
         }
     }
 
-    // Toast functionality
+    // Toast functionality (guard when toast not present)
     const toastElement = document.getElementById('toast');
     function showToast(message, type = 'success') {
+        if (!toastElement) return;
         toastElement.textContent = message;
+        toastElement.style.display = 'block';
         toastElement.className = 'toast show';
         toastElement.classList.add(type);
 
         setTimeout(() => {
             toastElement.className = 'toast';
+            toastElement.style.display = 'none';
         }, 3000);
     }
 });
