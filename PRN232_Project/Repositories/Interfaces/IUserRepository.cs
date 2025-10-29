@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +15,6 @@ namespace Repositories.Interfaces
         void Register(User user);
         User? GetUserByUsername(string username);
         void UpdatePassword(int userId, string newPassword);
+        Task<User?> GetUserById(Guid userId);
     }
 }

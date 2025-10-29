@@ -1,4 +1,6 @@
-﻿using Repositories.Interfaces;
+﻿using BusinessObjects;
+using DataAccessObjects;
+using Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,5 +27,16 @@ namespace Repositories
 
         public void UpdatePassword(int userId, string newPassword)
             => UserDAO.UpdatePassword(userId, newPassword);
+        private readonly UserDAO _userDAO;
+
+        public UserRepository(UserDAO userDAO)
+        {
+            _userDAO = userDAO; // Injects the DAO for user data
+        }
+
+        public Task<User?> GetUserById(Guid userId)
+        {
+            return _userDAO.GetUserById(userId);
+        }
     }
 }

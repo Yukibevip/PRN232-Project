@@ -8,5 +8,7 @@ namespace Repositories.Interfaces
 {
     public interface IFriendInvitationRepository
     {
+        Task CreateInvitation(Guid senderId, Guid receiverId);
+        Task AcceptInvitation(int invitationId);
     }
 }
