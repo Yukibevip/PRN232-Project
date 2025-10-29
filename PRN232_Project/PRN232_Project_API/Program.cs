@@ -1,6 +1,5 @@
-
-using DataAccessObjects;
 using Microsoft.EntityFrameworkCore;
+using DataAccessObjects;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
@@ -14,12 +13,17 @@ namespace PRN232_Project_API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // optional: load configuration file
+            builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
+            // Add services to the container.
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // Register EF DbContext (replace connection name and provider as needed)
+            builder.Services.AddDbContext<CallioTestContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IAccusationRepository, AccusationRepository>();
             builder.Services.AddScoped<IBlockListRepository, BlockListRepository>();
@@ -47,20 +51,23 @@ namespace PRN232_Project_API
             // End Swagger configuration
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+            }
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
+            app.UseRouting();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }

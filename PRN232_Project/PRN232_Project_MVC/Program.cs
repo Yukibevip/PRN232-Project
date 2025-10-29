@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PRN232_Project_MVC.Models;
 using Services;
 using Services.Interfaces;
+using System;
 
 namespace PRN232_Project_MVC
 {
@@ -23,13 +24,28 @@ namespace PRN232_Project_MVC
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
 
+            // APIService registration (if present)
+            var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7098";
+            builder.Services.AddHttpClient<Services.APIService>(client =>
+            {
+                client.BaseAddress = new Uri(apiBase);
+            });
+
+            // Enable session
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromHours(1);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -37,6 +53,8 @@ namespace PRN232_Project_MVC
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession(); // <-- must be before UseAuthorization
 
             app.UseAuthorization();
 

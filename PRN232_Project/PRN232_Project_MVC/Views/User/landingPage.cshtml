@@ -1,8 +1,25 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@using System.Text.Json
 @{
+    ViewBag.Title = "Landing";
+    var userJson = Context.Session.GetString("User");
+    string? displayName = null;
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(userJson);
+            if (doc.RootElement.TryGetProperty("FullName", out var fn) && fn.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(fn.GetString()))
+                displayName = fn.GetString();
+            else if (doc.RootElement.TryGetProperty("Username", out var un))
+                displayName = un.GetString();
+        }
+        catch { displayName = null; }
+    }
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +41,19 @@
                 <a href="/User/friend">Friends</a>
                 <a href="/User/setting">Settings</a>
                 <a href="/User/block">Block</a>
-                <a href="/User/login">Sign In</a>
+                @if (!string.IsNullOrEmpty(displayName))
+                {
+                    <div class="user-actions">
+                        <span class="user-greeting">Hello, @displayName</span>
+                        <form method="post" asp-controller="User" asp-action="Logout" class="logout-form">
+                            <button type="submit" class="btn-logout">Log out</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a href="@Url.Action("login", "User")">Sign In</a>
+                }
             </nav>
         </div>
     </header>
