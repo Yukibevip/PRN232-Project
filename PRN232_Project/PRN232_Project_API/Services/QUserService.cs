@@ -4,12 +4,12 @@ using Repositories.Interfaces;
 
 namespace PRN232_Project_API.Services
 {
-    public class UserService : IUserService
+    public class QUserService : QIUserService
     {
         private readonly IUserRepository _userRepo;
         private readonly IBlockListRepository _blockListRepo;
 
-        public UserService(IUserRepository userRepo, IBlockListRepository blockListRepo)
+        public QUserService(IUserRepository userRepo, IBlockListRepository blockListRepo)
         {
             _userRepo = userRepo;
             _blockListRepo = blockListRepo;

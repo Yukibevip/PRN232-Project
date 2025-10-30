@@ -7,9 +7,9 @@ namespace PRN232_Project_API.Controllers
 {
     public class FriendsController : BaseApiController
     {
-        private readonly IFriendService _friendService;
+        private readonly QIFriendService _friendService;
 
-        public FriendsController(IFriendService friendService)
+        public FriendsController(QIFriendService friendService)
         {
             _friendService = friendService;
         }

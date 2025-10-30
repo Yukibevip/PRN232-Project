@@ -4,11 +4,11 @@ using Repositories.Interfaces;
 
 namespace PRN232_Project_API.Services
 {
-    public class MessageService : IMessageService
+    public class QMessageService : QIMessageService
     {
         private readonly IMessageRepository _messageRepo;
 
-        public MessageService(IMessageRepository messageRepo)
+        public QMessageService(IMessageRepository messageRepo)
         {
             _messageRepo = messageRepo;
         }

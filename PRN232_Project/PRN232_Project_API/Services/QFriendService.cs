@@ -3,12 +3,12 @@ using Repositories.Interfaces;
 
 namespace PRN232_Project_API.Services
 {
-    public class FriendService : IFriendService
+    public class QFriendService : QIFriendService
     {
         private readonly IFriendInvitationRepository _invitationRepo;
         private readonly IFriendListRepository _friendListRepo;
 
-        public FriendService(IFriendInvitationRepository invitationRepo, IFriendListRepository friendListRepo)
+        public QFriendService(IFriendInvitationRepository invitationRepo, IFriendListRepository friendListRepo)
         {
             _invitationRepo = invitationRepo;
             _friendListRepo = friendListRepo;

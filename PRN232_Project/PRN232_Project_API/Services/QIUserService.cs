@@ -2,7 +2,7 @@
 
 namespace PRN232_Project_API.Services
 {
-    public interface IUserService
+    public interface QIUserService
     {
         Task<UserProfileDto?> GetUserProfileAsync(Guid userId);
         Task BlockUserAsync(Guid blockerId, BlockUserDto blockDto);

@@ -8,9 +8,9 @@ namespace PRN232_Project_API.Controllers
     
     public class MessagesController : BaseApiController
     {
-        private readonly IMessageService _messageService;
+        private readonly QIMessageService _messageService;
 
-        public MessagesController(IMessageService messageService)
+        public MessagesController(QIMessageService messageService)
         {
             _messageService = messageService;
         }

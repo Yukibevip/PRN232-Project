@@ -8,20 +8,24 @@ using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
 using DataAccessObjects;
 using Services.Interfaces;
+using PRN232_Project_API.DTOs;
+using PRN232_Project_API.Services;
 
 namespace PRN232_Project_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseApiController
     {
         private readonly CallioTestContext _context;
         private readonly IUserService _userService;
+        private readonly QIUserService _quserService;
 
-        public UsersController(CallioTestContext context, IUserService userService)
+        public UsersController(CallioTestContext context, IUserService userService, QIUserService quserService)
         {
             _context = context;
             _userService = userService;
+            _quserService = quserService;
         }
 
         // GET: api/Users
@@ -68,7 +72,7 @@ namespace PRN232_Project_API.Controllers
                 Console.WriteLine("Login failed: invalid credentials");
                 return Unauthorized(new { error = "invalid credentials" });
             }
-                
+
 
             user.Password = null!;
             return Ok(user);
@@ -321,7 +325,7 @@ namespace PRN232_Project_API.Controllers
         [HttpGet("{userId}/profile")]
         public async Task<ActionResult<UserProfileDto>> GetUserProfile(Guid userId)
         {
-            var userProfile = await _userService.GetUserProfileAsync(userId);
+            var userProfile = await _quserService.GetUserProfileAsync(userId);
             if (userProfile == null)
             {
                 return NotFound("User not found.");
@@ -336,7 +340,7 @@ namespace PRN232_Project_API.Controllers
             try
             {
                 var blockerId = GetCurrentUserId();
-                await _userService.BlockUserAsync(blockerId, blockDto);
+                await _quserService.BlockUserAsync(blockerId, blockDto);
                 return Ok("User blocked successfully.");
             }
             catch (InvalidOperationException ex)
@@ -352,7 +356,7 @@ namespace PRN232_Project_API.Controllers
             try
             {
                 var blockerId = GetCurrentUserId();
-                await _userService.UnblockUserAsync(blockerId, blockedId);
+                await _quserService.UnblockUserAsync(blockerId, blockedId);
                 return Ok("User has been unblocked.");
             }
             catch (KeyNotFoundException ex)
@@ -360,3 +364,6 @@ namespace PRN232_Project_API.Controllers
                 return NotFound(ex.Message); // "Block record not found."
             }
         }
+      
+    }
+}

@@ -2,7 +2,7 @@
 
 namespace PRN232_Project_API.Services
 {
-    public interface IFriendService
+    public interface QIFriendService
     {
         Task SendFriendRequestAsync(Guid senderId, Guid receiverId);
         Task AcceptFriendRequestAsync(int invitationId);
