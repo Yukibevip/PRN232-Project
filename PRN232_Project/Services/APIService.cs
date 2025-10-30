@@ -29,14 +29,16 @@ namespace Services
             return resp.IsSuccessStatusCode ? await resp.Content.ReadFromJsonAsync<User?>() : null;
         }
 
-        public async Task<bool> UpdateUserProfileAsync(Guid userId, string? fullname, string? email, string? avatarUrl)
+        // added gender parameter and include in payload
+        public async Task<bool> UpdateUserProfileAsync(Guid userId, string? fullname, string? email, string? avatarUrl, string? gender = null)
         {
             var payload = new
             {
                 UserId = userId,
                 FullName = fullname,
                 Email = email,
-                AvatarUrl = avatarUrl
+                AvatarUrl = avatarUrl,
+                Gender = gender
             };
             var resp = await _http.PostAsJsonAsync("api/users/update-profile", payload);
             return resp.IsSuccessStatusCode;

@@ -244,6 +244,7 @@ namespace PRN232_Project_API.Controllers
             lookup.TryGetValue("fullname", out var fullName);
             lookup.TryGetValue("email", out var email);
             lookup.TryGetValue("avatarurl", out var avatarUrl);
+            lookup.TryGetValue("gender", out var gender);
 
             if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 return BadRequest(new { error = "invalid userId" });
@@ -254,6 +255,7 @@ namespace PRN232_Project_API.Controllers
             if (!string.IsNullOrWhiteSpace(fullName)) user.FullName = fullName;
             if (!string.IsNullOrWhiteSpace(email)) user.Email = email;
             if (!string.IsNullOrWhiteSpace(avatarUrl)) user.AvatarUrl = avatarUrl;
+            if (!string.IsNullOrWhiteSpace(gender)) user.Gender = gender;
 
             _context.Entry(user).State = EntityState.Modified;
             await _context.SaveChangesAsync();

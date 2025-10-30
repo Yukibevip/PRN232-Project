@@ -521,3 +521,46 @@ input:checked + .slider {
         min-width: 0;
     }
 }
+.gender-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+    .gender-group input[type="radio"] {
+        display: none;
+    }
+
+.gender-option {
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #f6f8ff;
+    color: #1a1a1a;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+    .gender-group input[type="radio"]:checked + .gender-option,
+    .gender-option.active {
+        background: linear-gradient(90deg, #3366FF, #254edb);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 10px rgba(51,102,255,0.12);
+    }
+
+    /* ensure keyboard focus styles */
+    .gender-option:focus {
+        outline: 2px solid rgba(51,102,255,0.18);
+        outline-offset: 2px;
+    }
+
+/* small screens */
+@media (max-width: 480px) {
+    .gender-option {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.95rem;
+    }
+}

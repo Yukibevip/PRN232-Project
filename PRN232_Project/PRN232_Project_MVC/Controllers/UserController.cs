@@ -55,7 +55,7 @@ namespace PRN232_Project_MVC.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(IFormFile? avatar, string? fullname, string? email)
+        public async Task<IActionResult> UpdateProfile(IFormFile? avatar, string? fullname, string? email, string? gender)
         {
             // get user id from session
             var userJson = HttpContext.Session.GetString("User");
@@ -89,14 +89,14 @@ namespace PRN232_Project_MVC.Controllers
                 avatarUrl = $"/avatars/{fileName}";
             }
 
-            // call API to update DB
-            var updated = await _apiService.UpdateUserProfileAsync(userId, fullname, email, avatarUrl);
+            // call API to update DB (include gender)
+            var updated = await _apiService.UpdateUserProfileAsync(userId, fullname, email, avatarUrl, gender);
 
             if (updated)
             {
                 // refresh session minimal info
                 var user = await _apiService.GetUserByIdAsync(userId);
-                var sessionUser = new { user.UserId, user.Username, user.FullName };
+                var sessionUser = new { user.UserId, user.Username, user.FullName, user.Gender };
                 HttpContext.Session.SetString("User", JsonSerializer.Serialize(sessionUser));
 
                 ViewBag.Message = "Profile updated successfully.";
@@ -138,9 +138,9 @@ namespace PRN232_Project_MVC.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string username,string email, string password, string? googleId)
+        public async Task<IActionResult> Register(string username, string email, string password, string? googleId)
         {
-            var success = await _apiService.RegisterAsync(username,email, password, googleId);
+            var success = await _apiService.RegisterAsync(username, email, password, googleId);
             if (!success)
             {
                 ViewBag.RegisterError = "Register failed: username or email may already exist.";
