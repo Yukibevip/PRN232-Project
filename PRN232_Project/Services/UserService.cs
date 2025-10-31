@@ -15,8 +15,11 @@ namespace Services
         private readonly IBlockListRepository _blockListRepo;
 
         private readonly IUserRepository _repo;
-        public UserService(IUserRepository repo) => _repo = repo;
-
+        public UserService(IUserRepository userRepo, IBlockListRepository blockListRepo)
+        {
+            _repo = userRepo;
+            _blockListRepo = blockListRepo; // Now the tool is placed in the toolbox
+        }
         public User? Login(string username, string password)
             => _repo.Login(username, password);
 

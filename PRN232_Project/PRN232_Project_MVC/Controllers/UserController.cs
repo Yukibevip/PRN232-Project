@@ -6,6 +6,7 @@ using System.Text;
 using System.Net.Mail;
 using System.Net;
 using System.Threading.Tasks;
+using PRN232_Project_MVC.Models;
 
 namespace PRN232_Project_MVC.Controllers
 {
@@ -115,9 +116,28 @@ namespace PRN232_Project_MVC.Controllers
             return View();
         }
 
-        public IActionResult friend()
+        public async Task<IActionResult> friend()
         {
-            return View();
+            var userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return RedirectToAction("login");
+            }
+
+            // 1. Get the generic DTOs from the APIService
+            var friendDtos = await _apiService.GetFriendsAsync();
+
+            // 2. Map (convert) the DTOs to ViewModels
+            var friendViewModels = friendDtos.Select(dto => new FriendViewModel
+            {
+                UserId = dto.UserId,
+                Username = dto.Username,
+                FullName = dto.FullName,
+                AvatarUrl = dto.AvatarUrl
+            }).ToList();
+
+            // 3. Pass the list of ViewModels to the View
+            return View(friendViewModels);
         }
 
         [HttpPost]

@@ -9,6 +9,7 @@ using BusinessObjects;
 using DataAccessObjects;
 using Services.Interfaces;
 using Services.DTOs;
+using Services;
 
 
 namespace PRN232_Project_API.Controllers
@@ -71,7 +72,7 @@ namespace PRN232_Project_API.Controllers
                 return Unauthorized(new { error = "invalid credentials" });
             }
 
-
+            DemoAuthService.Login(user.UserId);
             user.Password = null!;
             return Ok(user);
         }

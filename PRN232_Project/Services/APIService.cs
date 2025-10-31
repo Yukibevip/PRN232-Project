@@ -1,8 +1,11 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text;
 using System.Threading.Tasks;
 using BusinessObjects;
+using Services.DTOs;
 
 namespace Services
 {
@@ -72,6 +75,37 @@ namespace Services
         {
             var resp = await _http.PostAsJsonAsync("api/users/reset-password", new { Email = email, NewPassword = newPassword });
             return resp.IsSuccessStatusCode;
+        }// In your APIService.cs file
+
+        // --- Friend Methods ---
+        public async Task<List<FriendDto>> GetFriendsAsync()
+        {
+            var response = await _http.GetAsync("api/Friends");
+            if (!response.IsSuccessStatusCode)
+            {
+                return new List<FriendDto>(); // Return empty list on failure
+            }
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            // Deserialize into the DTO, not the ViewModel
+            return JsonSerializer.Deserialize<List<FriendDto>>(jsonString,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<bool> UnfriendAsync(Guid friendId)
+        {
+            var response = await _http.DeleteAsync($"api/Friends/{friendId}");
+            return response.IsSuccessStatusCode;
+        }
+
+        // --- Block Methods ---
+        public async Task<bool> BlockUserAsync(Guid blockedId, int? durationInMinutes)
+        {
+            var blockData = new { blockedId, durationInMinutes };
+            var content = new StringContent(JsonSerializer.Serialize(blockData), Encoding.UTF8, "application/json");
+            var response = await _http.PostAsync("api/Users/block", content);
+            return response.IsSuccessStatusCode;
         }
     }
 }

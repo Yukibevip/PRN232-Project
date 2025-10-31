@@ -24,7 +24,11 @@ namespace PRN232_Project_API
             // Register EF DbContext (replace connection name and provider as needed)
             builder.Services.AddDbContext<CallioTestContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+            builder.Services.AddScoped<UserDAO>();
+            builder.Services.AddScoped<FriendListDAO>();
+            builder.Services.AddScoped<FriendInvitationDAO>();
+            builder.Services.AddScoped<BlockListDAO>();
+            builder.Services.AddScoped<MessageDAO>();
             builder.Services.AddScoped<IAccusationRepository, AccusationRepository>();
             builder.Services.AddScoped<IBlockListRepository, BlockListRepository>();
             builder.Services.AddScoped<IFriendInvitationRepository, FriendInvitationRepository>();
@@ -39,6 +43,16 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin() // Allows requests from any address
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
             //db connection
             var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
             builder.Services.AddDbContext<CallioTestContext>(options =>

@@ -48,6 +48,7 @@ namespace DataAccessObjects
                 user.Password = newPassword;
                 context.SaveChanges();
             }
+        }
         private readonly CallioTestContext _context;
         public UserDAO(CallioTestContext context) { _context = context; }
 
