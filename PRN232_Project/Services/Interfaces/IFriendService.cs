@@ -1,8 +1,13 @@
-﻿using PRN232_Project_API.DTOs;
+﻿using Services.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PRN232_Project_API.Services
+namespace Services.Interfaces
 {
-    public interface QIFriendService
+    public interface IFriendService
     {
         Task SendFriendRequestAsync(Guid senderId, Guid receiverId);
         Task AcceptFriendRequestAsync(int invitationId);

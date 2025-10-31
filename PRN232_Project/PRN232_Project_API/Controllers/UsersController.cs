@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
 using DataAccessObjects;
 using Services.Interfaces;
-using PRN232_Project_API.DTOs;
-using PRN232_Project_API.Services;
+using Services.DTOs;
+
 
 namespace PRN232_Project_API.Controllers
 {
@@ -19,13 +19,11 @@ namespace PRN232_Project_API.Controllers
     {
         private readonly CallioTestContext _context;
         private readonly IUserService _userService;
-        private readonly QIUserService _quserService;
 
-        public UsersController(CallioTestContext context, IUserService userService, QIUserService quserService)
+        public UsersController(CallioTestContext context, IUserService userService)
         {
             _context = context;
             _userService = userService;
-            _quserService = quserService;
         }
 
         // GET: api/Users
@@ -325,7 +323,7 @@ namespace PRN232_Project_API.Controllers
         [HttpGet("{userId}/profile")]
         public async Task<ActionResult<UserProfileDto>> GetUserProfile(Guid userId)
         {
-            var userProfile = await _quserService.GetUserProfileAsync(userId);
+            var userProfile = await _userService.GetUserProfileAsync(userId);
             if (userProfile == null)
             {
                 return NotFound("User not found.");
@@ -340,7 +338,7 @@ namespace PRN232_Project_API.Controllers
             try
             {
                 var blockerId = GetCurrentUserId();
-                await _quserService.BlockUserAsync(blockerId, blockDto);
+                await _userService.BlockUserAsync(blockerId, blockDto);
                 return Ok("User blocked successfully.");
             }
             catch (InvalidOperationException ex)
@@ -356,7 +354,7 @@ namespace PRN232_Project_API.Controllers
             try
             {
                 var blockerId = GetCurrentUserId();
-                await _quserService.UnblockUserAsync(blockerId, blockedId);
+                await _userService.UnblockUserAsync(blockerId, blockedId);
                 return Ok("User has been unblocked.");
             }
             catch (KeyNotFoundException ex)

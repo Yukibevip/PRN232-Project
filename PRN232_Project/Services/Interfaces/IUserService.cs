@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BusinessObjects;
+using Services.DTOs;
 
 namespace Services.Interfaces
 {
@@ -14,5 +15,8 @@ namespace Services.Interfaces
         void Register(User user);
         User? GetUserByUsername(string username);
         void UpdatePassword(int userId, string newPassword);
+        Task<UserProfileDto?> GetUserProfileAsync(Guid userId);
+        Task BlockUserAsync(Guid blockerId, BlockUserDto blockDto);
+        Task UnblockUserAsync(Guid blockerId, Guid blockedId);
     }
 }

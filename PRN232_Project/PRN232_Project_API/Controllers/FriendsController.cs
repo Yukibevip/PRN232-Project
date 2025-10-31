@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PRN232_Project_API.DTOs;
-using PRN232_Project_API.Services;
+using Services.DTOs;
+using Services.Interfaces;
+
 
 namespace PRN232_Project_API.Controllers
 {
     public class FriendsController : BaseApiController
     {
-        private readonly QIFriendService _friendService;
+        private readonly IFriendService _friendService;
 
-        public FriendsController(QIFriendService friendService)
+        public FriendsController(IFriendService friendService)
         {
             _friendService = friendService;
         }

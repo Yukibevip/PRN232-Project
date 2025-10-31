@@ -1,14 +1,20 @@
-﻿using PRN232_Project_API.DTOs;
-using Repositories.Interfaces;
+﻿using Repositories.Interfaces;
+using Services.DTOs;
+using Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PRN232_Project_API.Services
+namespace Services
 {
-    public class QFriendService : QIFriendService
+    public class FriendService : IFriendService
     {
         private readonly IFriendInvitationRepository _invitationRepo;
         private readonly IFriendListRepository _friendListRepo;
 
-        public QFriendService(IFriendInvitationRepository invitationRepo, IFriendListRepository friendListRepo)
+        public FriendService(IFriendInvitationRepository invitationRepo, IFriendListRepository friendListRepo)
         {
             _invitationRepo = invitationRepo;
             _friendListRepo = friendListRepo;

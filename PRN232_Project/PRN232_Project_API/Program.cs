@@ -35,8 +35,7 @@ namespace PRN232_Project_API
 
             builder.Services.AddScoped<IAccusationService, AccusationService>();
             builder.Services.AddScoped<IBlockListService, BlockListService>();
-            builder.Services.AddScoped<IFriendInvitationService, FriendInvitationService>();
-            builder.Services.AddScoped<IFriendListService, FriendListService>();
+            builder.Services.AddScoped<IFriendService, FriendService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
