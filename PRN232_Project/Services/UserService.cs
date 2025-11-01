@@ -72,5 +72,25 @@ namespace Services
         {
             return _blockListRepo.UnblockUser(blockerId, blockedId);
         }
+        public Task<bool> IsChatBlockedAsync(Guid userId1, Guid userId2)
+        {
+            // Ask the repository to check for a block in either direction
+            return _blockListRepo.IsBlocked(userId1, userId2);
+        }
+        public async Task<IEnumerable<UserProfileDto>> GetBlockedUsersAsync(Guid blockerId)
+        {
+            // 1. Get the list of User objects from the repository
+            //    This call creates the "1 reference" on your repository method.
+            var users = await _blockListRepo.GetBlockedUsers(blockerId);
+
+            // 2. Map them to DTOs to send back to the API controller
+            return users.Select(u => new UserProfileDto
+            {
+                UserId = u.UserId,
+                Username = u.Username,
+                FullName = u.FullName,
+                AvatarUrl = u.AvatarUrl
+            });
+        }
     }
 }

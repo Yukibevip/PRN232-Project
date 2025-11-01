@@ -238,6 +238,12 @@
                 flex-shrink: 0;
             }
 
+                /* Style for disabled button */
+                .message-input-form button:disabled {
+                    background-color: #b0c4ff;
+                    cursor: not-allowed;
+                }
+
         .no-chat-selected {
             display: flex;
             justify-content: center;
@@ -330,11 +336,28 @@
                     }
                 </div>
 
-                <!-- Message input form -->
-                <form class="message-input-form" id="message-form">
-                    <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" />
-                    <button type="submit" title="Send">➤</button>
-                </form>
+                <!--
+                =================================================
+                NEW "BLOCKED CHAT" LOGIC IS HERE
+                =================================================
+                -->
+                @if (Model.IsChatBlocked)
+                {
+                    <!-- If chat is blocked, show a disabled input -->
+                    <div class="message-input-form">
+                        <input type="text" placeholder="You can't send messages to a blocked user." disabled />
+                        <button type="submit" title="Send" disabled>➤</button>
+                    </div>
+                }
+                else
+                {
+                    <!-- Otherwise, show the normal, working form -->
+                    <form class="message-input-form" id="message-form">
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" />
+                        <button type="submit" title="Send">➤</button>
+                    </form>
+                }
+
             }
             else
             {
@@ -355,10 +378,11 @@
             // Get the IDs of the users
             const currentUserId = document.getElementById("currentUserId")?.value;
             const receiverId = document.getElementById("receiverId")?.value;
+            const isBlocked = @Html.Raw(Json.Serialize(Model.IsChatBlocked));
 
             // Only run the chat script if we are actually in a chat window
-            if (!currentUserId || !receiverId) {
-                console.log("Not in a chat window. SignalR not started.");
+            if (!currentUserId || !receiverId || isBlocked) {
+                console.log("Not in a chat window or chat is blocked. SignalR not started.");
                 return;
             }
 
@@ -408,9 +432,11 @@
             if (messageForm) {
                 messageForm.addEventListener("submit", function (event) {
 
-                    // 👇 ----- THIS IS THE FIX ----- 👇
+                    //
+                    // This is the fix for the page going blank
+                    //
                     event.preventDefault();
-                    // 👆 --------------------------- 👆
+
 
                     const messageText = messageInput.value.trim();
 

@@ -28,7 +28,17 @@ namespace Repositories
             }
             await _blockListDAO.Add(block);
         }
-
+        public Task<bool> IsUserBlockedBy(Guid blockerId, Guid blockedId)
+        {
+            // This creates the "1 reference" to your new DAO method
+            return _blockListDAO.IsUserBlockedBy(blockerId, blockedId);
+        }
+        public Task<IEnumerable<User>> GetBlockedUsers(Guid blockerId)
+        {
+            // This line "creates" the reference.
+            // The "0" will change to "1" after you add this.
+            return _blockListDAO.GetBlockedUsers(blockerId);
+        }
         public async Task UnblockUser(Guid blockerId, Guid blockedId)
         {
             // Business Rule: Ensure a block record exists before trying to remove it.
@@ -38,6 +48,11 @@ namespace Repositories
                 throw new KeyNotFoundException("Block record not found.");
             }
             await _blockListDAO.Remove(block);
+        }
+        public Task<bool> IsBlocked(Guid userId1, Guid userId2)
+        {
+            // Call the DAO to check if a block exists in either direction
+            return _blockListDAO.CheckForBlock(userId1, userId2);
         }
     }
 }

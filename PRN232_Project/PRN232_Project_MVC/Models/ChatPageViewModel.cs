@@ -11,5 +11,6 @@ namespace PRN232_Project_MVC.Models
 
         // 3. The message history for this chat
         public List<MessageViewModel> ConversationHistory { get; set; } = new List<MessageViewModel>();
+        public bool IsChatBlocked { get; set; } = false;
     }
 }

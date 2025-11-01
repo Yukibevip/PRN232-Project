@@ -93,21 +93,7 @@ namespace Services
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
-        public async Task<bool> UnfriendAsync(Guid friendId)
-        {
-            var response = await _http.DeleteAsync($"api/Friends/{friendId}");
-            return response.IsSuccessStatusCode;
-        }
-
-        // --- Block Methods ---
-        public async Task<bool> BlockUserAsync(Guid blockedId, int? durationInMinutes)
-        {
-            var blockData = new { blockedId, durationInMinutes };
-            var content = new StringContent(JsonSerializer.Serialize(blockData), Encoding.UTF8, "application/json");
-            var response = await _http.PostAsync("api/Users/block", content);
-            return response.IsSuccessStatusCode;
-
-        }
+        
         public async Task<List<FriendDto>> GetFriendsAsync(string? searchInput)
         {
             // Build the query URL, adding the searchInput if it exists
@@ -156,6 +142,75 @@ namespace Services
 
             // This calls your API endpoint: POST /api/Messages
             var response = await _http.PostAsync("api/Messages", jsonContent);
+            return response.IsSuccessStatusCode;
+        }
+        // ... inside your APIService class ...
+
+        public async Task<bool> CheckBlockStatusAsync(Guid friendId)
+        {
+            // This calls a new API endpoint we are about to create
+            var response = await _http.GetAsync($"api/Users/check-block/{friendId}");
+
+            // We'll deserialize the true/false response
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonString = await response.Content.ReadAsStringAsync();
+                // The API will return a simple JSON like: { "isBlocked": true }
+                // We parse this JSON to get the boolean value.
+                try
+                {
+                    using (var doc = JsonDocument.Parse(jsonString))
+                    {
+                        return doc.RootElement.GetProperty("isBlocked").GetBoolean();
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            return false; // Assume not blocked if API call fails
+        }
+
+        // You also need these methods if you don't have them
+        // This fixes your "Unfriend" 404 error
+        public async Task<bool> UnfriendAsync(Guid friendId)
+        {
+            var response = await _http.DeleteAsync($"api/Friends/{friendId}");
+            return response.IsSuccessStatusCode;
+        }
+
+        // This fixes your "Block" 404 error
+        public async Task<bool> BlockUserAsync(Guid blockedId, int? durationInMinutes)
+        {
+            var blockData = new { blockedId, durationInMinutes };
+            var content = new StringContent(JsonSerializer.Serialize(blockData), Encoding.UTF8, "application/json");
+            var response = await _http.PostAsync("api/Users/block", content);
+            return response.IsSuccessStatusCode;
+        }
+        public async Task<List<FriendDto>> GetBlockedUsersAsync()
+        {
+            // 1. Call the API endpoint
+            var response = await _http.GetAsync("api/Users/blocked-list");
+
+            // 2. Check if the call was successful
+            if (!response.IsSuccessStatusCode)
+            {
+                return new List<FriendDto>(); // Return an empty list on failure
+            }
+
+            // 3. Read the JSON response
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            // 4. Convert the JSON into a list of DTOs and return it
+            //    We can re-use the FriendDto for this, as it has the same properties
+            return JsonSerializer.Deserialize<List<FriendDto>>(jsonString,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        public async Task<bool> UnblockUserAsync(Guid blockedId)
+        {
+            // This calls your API endpoint: DELETE /api/Users/unblock/{blockedId}
+            var response = await _http.DeleteAsync($"api/Users/unblock/{blockedId}");
             return response.IsSuccessStatusCode;
         }
     }

@@ -13,11 +13,12 @@ namespace Services
     {
         private readonly IFriendInvitationRepository _invitationRepo;
         private readonly IFriendListRepository _friendListRepo;
-
-        public FriendService(IFriendInvitationRepository invitationRepo, IFriendListRepository friendListRepo)
+        private readonly IBlockListRepository _blockListRepo; // 👈 ADD THIS
+        public FriendService(IFriendInvitationRepository invitationRepo, IFriendListRepository friendListRepo, IBlockListRepository blockListRepo)
         {
             _invitationRepo = invitationRepo;
             _friendListRepo = friendListRepo;
+            _blockListRepo = blockListRepo;
         }
 
         public Task SendFriendRequestAsync(Guid senderId, Guid receiverId)
@@ -33,14 +34,23 @@ namespace Services
         public async Task<IEnumerable<UserProfileDto>> GetFriendListAsync(Guid currentUserId, string? username)
         {
             var friends = await _friendListRepo.GetFriendsByUsername(currentUserId, username ?? string.Empty);
-            // Map the User business object to the public-facing DTO
-            return friends.Select(u => new UserProfileDto
+            var dtos = new List<UserProfileDto>();
+
+            foreach (var user in friends)
             {
-                UserId = u.UserId,
-                Username = u.Username,
-                FullName = u.FullName,
-                AvatarUrl = u.AvatarUrl
-            });
+                // Here is the new logic!
+                var isBlocked = await _blockListRepo.IsUserBlockedBy(currentUserId, user.UserId);
+
+                dtos.Add(new UserProfileDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    FullName = user.FullName,
+                    AvatarUrl = user.AvatarUrl,
+                    IsBlocked = isBlocked // We add the new property here
+                });
+            }
+            return dtos;
         }
 
         public Task UnfriendAsync(Guid currentUserId, Guid friendId)

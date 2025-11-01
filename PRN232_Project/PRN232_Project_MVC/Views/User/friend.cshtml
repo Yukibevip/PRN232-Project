@@ -93,9 +93,20 @@
                             </form>
 
                             <!-- This form will post to your UserController's BlockUser action -->
-                            <form asp-controller="User" asp-action="BlockUser" asp-route-blockedId="@friend.UserId" method="post">
-                                <button type="submit" class="btn btn-block">Block</button>
-                            </form>
+                            @if (friend.IsBlocked)
+                            {
+                                <!-- If friend IS blocked, show the UNBLOCK button -->
+                                <form asp-controller="User" asp-action="Unblock" asp-route-blockedId="@friend.UserId" method="post">
+                                    <button type="submit" class="btn btn-unblock">Unblock</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <!-- If friend is NOT blocked, show the BLOCK button -->
+                                <form asp-controller="User" asp-action="BlockUser" asp-route-blockedId="@friend.UserId" method="post">
+                                    <button type="submit" class="btn btn-block">Block</button>
+                                </form>
+                            }
                         </div>
                     </li>
                 }

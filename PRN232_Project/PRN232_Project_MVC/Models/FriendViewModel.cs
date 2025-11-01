@@ -7,6 +7,6 @@
         public string Username { get; set; } = null!;
         public string FullName { get; set; } = null!;
         public string? AvatarUrl { get; set; }
-
+        public bool IsBlocked { get; set; }
     }
 }

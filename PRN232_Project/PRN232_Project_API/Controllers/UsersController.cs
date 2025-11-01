@@ -363,6 +363,24 @@ namespace PRN232_Project_API.Controllers
                 return NotFound(ex.Message); // "Block record not found."
             }
         }
-      
+        [HttpGet("check-block/{friendId}")]
+        public async Task<IActionResult> CheckBlockStatus(Guid friendId)
+        {
+            var currentUserId = GetCurrentUserId(); // From BaseApiController
+
+            // We need to ask the service layer (which will ask the repository)
+            var isBlocked = await _userService.IsChatBlockedAsync(currentUserId, friendId);
+
+            // Return a simple JSON object
+            return Ok(new { isBlocked });
+        }
+        [HttpGet("blocked-list")]
+        public async Task<ActionResult<IEnumerable<UserProfileDto>>> GetBlockedList()
+        {
+            var currentUserId = GetCurrentUserId();
+            // This calls the QUserService method you just added
+            var users = await _userService.GetBlockedUsersAsync(currentUserId);
+            return Ok(users);
+        }
     }
 }

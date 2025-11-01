@@ -18,5 +18,8 @@ namespace Services.Interfaces
         Task<UserProfileDto?> GetUserProfileAsync(Guid userId);
         Task BlockUserAsync(Guid blockerId, BlockUserDto blockDto);
         Task UnblockUserAsync(Guid blockerId, Guid blockedId);
+        public Task<bool> IsChatBlockedAsync(Guid userId1, Guid userId2);
+        Task<IEnumerable<UserProfileDto>> GetBlockedUsersAsync(Guid blockerId);
+
     }
 }
