@@ -43,6 +43,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddSignalR();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins",
@@ -81,6 +82,7 @@ namespace PRN232_Project_API
             app.UseRouting();
             app.UseAuthorization();
             app.MapControllers();
+            app.MapHub<ChatHub>("/chatHub"); 
             app.Run();
         }
     }

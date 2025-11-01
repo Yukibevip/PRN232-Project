@@ -106,6 +106,57 @@ namespace Services
             var content = new StringContent(JsonSerializer.Serialize(blockData), Encoding.UTF8, "application/json");
             var response = await _http.PostAsync("api/Users/block", content);
             return response.IsSuccessStatusCode;
+
+        }
+        public async Task<List<FriendDto>> GetFriendsAsync(string? searchInput)
+        {
+            // Build the query URL, adding the searchInput if it exists
+            string apiUrl = "api/Friends";
+            if (!string.IsNullOrEmpty(searchInput))
+            {
+                apiUrl += $"?username={searchInput}";
+            }
+
+            var response = await _http.GetAsync(apiUrl);
+            if (!response.IsSuccessStatusCode)
+            {
+                return new List<FriendDto>(); // Return empty list on failure
+            }
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            // Deserialize into the DTO
+            return JsonSerializer.Deserialize<List<FriendDto>>(jsonString,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
+        //
+        // METHOD 2: FOR GETTING CHAT HISTORY (Fixes GetConversationHistoryAsync error)
+        //
+        public async Task<List<MessageDto>> GetConversationHistoryAsync(Guid friendId)
+        {
+            var response = await _http.GetAsync($"api/Messages/{friendId}");
+            if (!response.IsSuccessStatusCode)
+            {
+                return new List<MessageDto>();
+            }
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<MessageDto>>(jsonString,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
+        //
+        // METHOD 3: FOR SAVING A NEW MESSAGE (Fixes SaveMessageAsync error)
+        //
+        public async Task<bool> SaveMessageAsync(Guid receiverId, string content)
+        {
+            var messageData = new { receiverId, content };
+            var jsonContent = new StringContent(JsonSerializer.Serialize(messageData), Encoding.UTF8, "application/json");
+
+            // This calls your API endpoint: POST /api/Messages
+            var response = await _http.PostAsync("api/Messages", jsonContent);
+            return response.IsSuccessStatusCode;
         }
     }
 }
