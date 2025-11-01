@@ -1,0 +1,484 @@
+﻿@* This file holds the entire chat UI *@
+@using System.Text.Json
+@using PRN232_Project_MVC.Models
+@model PRN232_Project_MVC.Models.ChatPageViewModel
+@{
+    ViewData["Title"] = "Chat";
+    var userJson = Context.Session.GetString("User");
+    string? displayName = null;
+    Guid currentUserId = Guid.Empty;
+
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(userJson);
+            if (doc.RootElement.TryGetProperty("FullName", out var fn) && fn.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(fn.GetString()))
+                displayName = fn.GetString();
+            else if (doc.RootElement.TryGetProperty("Username", out var un))
+                displayName = un.GetString();
+
+            if (doc.RootElement.TryGetProperty("UserId", out var idEl) && idEl.ValueKind == JsonValueKind.String)
+                Guid.TryParse(idEl.GetString(), out currentUserId);
+        }
+        catch { }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - ChatApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="~/css/friend.css" rel="stylesheet" />
+
+    <!-- CSS for the new chat layout -->
+    <style>
+        :root {
+            --chat-bg: #f6f8ff;
+            --sidebar-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --text-dark: #1a1a1a;
+            --text-light: #6b7280;
+            --bubble-sent: #3366FF;
+            --bubble-sent-text: #ffffff;
+            --bubble-received: #e9ecef;
+            --bubble-received-text: #1a1a1a;
+            --primary: #3366FF;
+        }
+
+        /* Remove default body margin */
+        body {
+            margin: 0;
+            background-color: var(--chat-bg);
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 71px); /* Full height minus header */
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Sidebar for friend list */
+        .chat-sidebar {
+            width: 320px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .friend-list-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+            .friend-list-nav a {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 1rem 1.5rem;
+                text-decoration: none;
+                border-bottom: 1px solid var(--border-color);
+                transition: background-color 0.2s ease;
+            }
+
+                .friend-list-nav a:hover {
+                    background-color: var(--chat-bg);
+                }
+
+                .friend-list-nav a.active {
+                    background-color: var(--primary);
+                    color: white;
+                }
+
+                    .friend-list-nav a.active .friend-name {
+                        color: white;
+                    }
+
+                    .friend-list-nav a.active .friend-username {
+                        color: #d1d5db;
+                    }
+
+            .friend-list-nav img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+        .friend-name {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .friend-username {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Main chat window */
+        .chat-window {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #f6f8ff; /* Soft background */
+        }
+
+        .chat-header {
+            background-color: var(--sidebar-bg);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+            .chat-header img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+            }
+
+        .chat-header-info .name {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .chat-header-info .status {
+            font-size: 0.85rem;
+            color: #22c55e; /* Online */
+        }
+
+        .messages-list {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            max-width: 70%;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+            .message-bubble.sent {
+                background-color: var(--bubble-sent);
+                color: var(--bubble-sent-text);
+                border-bottom-right-radius: 4px;
+                align-self: flex-end;
+            }
+
+            .message-bubble.received {
+                background-color: var(--bubble-received);
+                color: var(--bubble-received-text);
+                border-bottom-left-radius: 4px;
+                align-self: flex-start;
+            }
+
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .sent .message-timestamp {
+            text-align: right;
+        }
+
+        .received .message-timestamp {
+            text-align: left;
+        }
+
+
+        .message-input-form {
+            background-color: var(--sidebar-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+            .message-input-form input {
+                flex-grow: 1;
+                border: 1px solid var(--border-color);
+                border-radius: 20px;
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+                font-family: 'Inter', sans-serif;
+            }
+
+            .message-input-form button {
+                border: none;
+                background-color: var(--primary);
+                color: white;
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+                cursor: pointer;
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+        .no-chat-selected {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 1.25rem;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Re-use the header from your friend.cshtml -->
+    <header class="main-header">
+        <div class="header-container">
+            <a href="/Home/index" class="logo">ChatApp</a>
+            <nav class="main-nav">
+                <div class="nav-group">
+                    <!-- Update the 'active' class based on the page -->
+                    <a href="/User/friend" class="active">Friends</a>
+                    <a href="/User/setting">Settings</a>
+                    <a href="/User/block">Block</a>
+                </div>
+                @if (!string.IsNullOrEmpty(displayName))
+                {
+                    <div class="user-actions">
+                        <span class="user-greeting">@displayName</span>
+                        <form method="post" asp-controller="User" asp-action="Logout" class="logout-form">
+                            <button type="submit" class="btn-logout">Log out</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="user-actions">
+                        <a href="@Url.Action("login", "User")" style="text-decoration:none;" class="btn-logout">Sign In</a>
+                    </div>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <!-- This is the new Chat Layout -->
+    <div class="chat-container">
+
+        <!-- Column 1: Friends Sidebar -->
+        <aside class="chat-sidebar">
+            <div class="sidebar-header">Conversations</div>
+            <ul class="friend-list-nav">
+                @foreach (var friend in Model.Friends)
+                {
+                    <!-- This link reloads the page to chat with a different friend -->
+                    <a href="@Url.Action("Chat", "User", new { friendId = friend.UserId })"
+                       class="@(friend.UserId == Model.ChattingWith?.UserId ? "active" : "")">
+                        <img src="@(friend.AvatarUrl ?? "https://placehold.co/40x40/3366FF/FFFFFF?text=" + friend.Username[0])" alt="Avatar">
+                        <div>
+                            <div class="friend-name">@friend.FullName</div>
+                            <div class="friend-username">@@@friend.Username</div>
+                        </div>
+                    </a>
+                }
+            </ul>
+        </aside>
+
+        <!-- Column 2: Main Chat Window -->
+        <main class="chat-window">
+            @if (Model.ChattingWith != null)
+            {
+                <!-- Store the IDs we need for JavaScript -->
+                <input type="hidden" id="currentUserId" value="@currentUserId" />
+                <input type="hidden" id="receiverId" value="@Model.ChattingWith.UserId" />
+
+                <!-- Header of the chat window -->
+                <div class="chat-header">
+                    <img src="@(Model.ChattingWith.AvatarUrl ?? "https://placehold.co/40x40/3366FF/FFFFFF?text=" + Model.ChattingWith.Username[0])" alt="Avatar">
+                    <div class="chat-header-info">
+                        <div class="name">@Model.ChattingWith.FullName</div>
+                        <div class="status">Online</div>
+                    </div>
+                </div>
+
+                <!-- List of messages -->
+                <div class="messages-list" id="messages-list">
+                    @foreach (var message in Model.ConversationHistory)
+                    {
+                        var isSent = message.SenderId == currentUserId;
+                        <div class="message-bubble @(isSent ? "sent" : "received")">
+                            <div>@message.Content</div>
+                            <div class="message-timestamp">@message.SentAt.ToLocalTime().ToString("g")</div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Message input form -->
+                <form class="message-input-form" id="message-form">
+                    <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" />
+                    <button type="submit" title="Send">➤</button>
+                </form>
+            }
+            else
+            {
+                <div class="no-chat-selected">
+                    Select a friend from the list to start chatting.
+                </div>
+            }
+        </main>
+    </div>
+
+    <!-- Import the SignalR JavaScript client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
+    <!-- JavaScript to power the real-time chat -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // Get the IDs of the users
+            const currentUserId = document.getElementById("currentUserId")?.value;
+            const receiverId = document.getElementById("receiverId")?.value;
+
+            // Only run the chat script if we are actually in a chat window
+            if (!currentUserId || !receiverId) {
+                console.log("Not in a chat window. SignalR not started.");
+                return;
+            }
+
+            // Get references to the HTML elements
+            const messagesList = document.getElementById("messages-list");
+            const messageForm = document.getElementById("message-form");
+            const messageInput = document.getElementById("message-input");
+
+            // Scroll to the bottom of the chat history on load
+            if (messagesList) {
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+
+            // 1. === BUILD THE SIGNALR CONNECTION ===
+            // This connects to the ChatHub on your API.
+            // Make sure the URL matches your API's address.
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7098/chatHub", { // ⚠️ UPDATE THIS URL TO YOUR API ADDRESS
+                    withCredentials: true
+                })
+                .build();
+
+            // 2. === SET UP LISTENER FOR INCOMING MESSAGES ===
+            // This function runs when the server *sends* a message to this client.
+            connection.on("ReceiveMessage", function (senderId, messageText, sentAt) {
+                // Check if the message is from the person we are currently chatting with
+                if (senderId === receiverId) {
+                    const isSent = false; // It's a received message
+                    appendMessage(messageText, new Date(sentAt), isSent);
+                }
+            });
+
+            // 3. === START THE CONNECTION ===
+            connection.start().then(function () {
+                console.log("SignalR Connected.");
+                // Tell the hub who this user is
+                connection.invoke("Register", currentUserId).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }).catch(function (err) {
+                console.error("SignalR Connection Error: ", err.toString()); // More detailed logging
+                return console.error(err.toString());
+            });
+
+            // 4. === HANDLE SENDING A MESSAGE ===
+            // This runs when the user submits the message form.
+            if (messageForm) {
+                messageForm.addEventListener("submit", function (event) {
+
+                    // 👇 ----- THIS IS THE FIX ----- 👇
+                    event.preventDefault();
+                    // 👆 --------------------------- 👆
+
+                    const messageText = messageInput.value.trim();
+
+                    if (messageText) {
+                        // Send the message to the SignalR Hub on the server
+                        connection.invoke("SendMessage", currentUserId, receiverId, messageText)
+                            .catch(function (err) {
+                                return console.error(err.toString());
+                            });
+
+                        // Add the message to our *own* screen immediately
+                        appendMessage(messageText, new Date(), true);
+
+                        // Also, save the message to the database via the API
+                        // This is "fire and forget" - we just send it, we don't wait for a response
+                        saveMessageToDb(receiverId, messageText);
+
+                        messageInput.value = "";
+                    }
+                });
+            }
+
+            // Helper function to add a new chat bubble to the UI
+            function appendMessage(text, date, isSent) {
+                if (!messagesList) return; // Safety check
+
+                const bubble = document.createElement("div");
+                bubble.classList.add("message-bubble");
+                bubble.classList.add(isSent ? "sent" : "received");
+
+                const textDiv = document.createElement("div");
+                textDiv.textContent = text;
+
+                const timestampDiv = document.createElement("div");
+                timestampDiv.classList.add("message-timestamp");
+                timestampDiv.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                bubble.appendChild(textDiv);
+                bubble.appendChild(timestampDiv);
+                messagesList.appendChild(bubble);
+
+                // Scroll to the new message
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+
+            // Helper function to save the message to the database
+            function saveMessageToDb(receiverId, content) {
+                // We use the APIService in the MVC app to log the message.
+                // This call goes from the JS (client) to the MVC Controller,
+                // which then calls the APIService, which calls the API.
+                fetch("/User/SaveMessage", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        // Add anti-forgery token if you have one
+                    },
+                    body: JSON.stringify({
+                        ReceiverId: receiverId,
+                        Content: content
+                    })
+                })
+                .then(response => {
+                    if(!response.ok) console.error("Failed to save message to DB.");
+                })
+                .catch(err => console.error("Error saving message:", err));
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -7,7 +7,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Threading.Tasks;
 using PRN232_Project_MVC.Models;
-
+using Services.DTOs;
 namespace PRN232_Project_MVC.Controllers
 {
     public class UserController : Controller
@@ -292,6 +292,83 @@ namespace PRN232_Project_MVC.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
+        }
+        // Add these two new actions inside your UserController class
+
+        //
+        // This action loads the chat page and fixes your 404 Not Found error
+        //
+        [HttpGet]
+        public async Task<IActionResult> Chat(Guid? friendId)
+        {
+            var userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return RedirectToAction("login");
+            }
+
+            // 1. Get the full friend list for the sidebar
+            var friendDtos = await _apiService.GetFriendsAsync(null); // Get all friends
+            var friendsList = friendDtos.Select(dto => new FriendViewModel
+            {
+                UserId = dto.UserId,
+                Username = dto.Username,
+                FullName = dto.FullName,
+                AvatarUrl = dto.AvatarUrl
+            }).ToList();
+
+            // 2. Create the view model
+            var viewModel = new ChatPageViewModel
+            {
+                Friends = friendsList
+            };
+
+            // 3. If a friendId was passed, get the chat history for that friend
+            if (friendId != null)
+            {
+                // Find the friend we are chatting with
+                viewModel.ChattingWith = friendsList.FirstOrDefault(f => f.UserId == friendId);
+
+                if (viewModel.ChattingWith != null)
+                {
+                    // Get the conversation history from the API
+                    var messageDtos = await _apiService.GetConversationHistoryAsync(friendId.Value);
+
+                    // Map DTOs to MessageViewModels
+                    viewModel.ConversationHistory = messageDtos.Select(dto => new MessageViewModel
+                    {
+                        MessageId = dto.MessageId,
+                        SenderId = dto.SenderId,
+                        ReceiverId = dto.ReceiverId,
+                        Content = dto.Content,
+                        SentAt = dto.SentAt
+                    }).ToList();
+                }
+            }
+
+            // 4. Return the view with the complete model
+            return View(viewModel);
+        }
+
+        //
+        // This action is called by the JavaScript 'fetch' in chat.cshtml to save a message
+        //
+        [HttpPost]
+        public async Task<IActionResult> SaveMessage([FromBody] SendMessageDto message)
+        {
+            var userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return Unauthorized(); // User is not logged in
+            }
+
+            var success = await _apiService.SaveMessageAsync(message.ReceiverId, message.Content);
+
+            if (success)
+            {
+                return Ok(); // 200 OK
+            }
+            return BadRequest(); // 400 Bad Request
         }
     }
 }

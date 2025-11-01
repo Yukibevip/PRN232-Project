@@ -86,8 +86,7 @@
                         </div>
 
                         <div class="friend-actions">
-                            <a href="#" class="btn btn-message">Message</a>
-                            
+                            <a href="@Url.Action("Chat", "User", new { friendId = friend.UserId })" class="btn btn-message">Message</a>
                             <!-- This form will post to your UserController's Unfriend action -->
                             <form asp-controller="User" asp-action="Unfriend" asp-route-friendId="@friend.UserId" method="post">
                                 <button type="submit" class="btn btn-unfriend">Unfriend</button>
