@@ -26,7 +26,13 @@ namespace PRN232_Project_MVC
 
             // APIService registration (if present)
             var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7098";
-            builder.Services.AddHttpClient<Services.APIService>(client =>
+            builder.Services.AddHttpClient<APIService>(client =>
+            {
+                client.BaseAddress = new Uri(apiBase);
+            });
+
+            // Register AdminService as a typed HTTP client implementing IAdminService
+            builder.Services.AddHttpClient<IAdminService, AdminService>(client =>
             {
                 client.BaseAddress = new Uri(apiBase);
             });

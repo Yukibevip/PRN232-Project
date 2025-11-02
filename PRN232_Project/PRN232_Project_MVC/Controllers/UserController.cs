@@ -96,7 +96,7 @@ namespace PRN232_Project_MVC.Controllers
             {
                 // refresh session minimal info
                 var user = await _apiService.GetUserByIdAsync(userId);
-                var sessionUser = new { user.UserId, user.Username, user.FullName, user.Gender };
+                var sessionUser = new { user.UserId, user.Username, user.FullName, user.Gender, user.UserRole };
                 HttpContext.Session.SetString("User", JsonSerializer.Serialize(sessionUser));
 
                 ViewBag.Message = "Profile updated successfully.";
@@ -130,9 +130,15 @@ namespace PRN232_Project_MVC.Controllers
                 return View("login");
             }
 
-            // store minimal user info in session (JSON)
-            var sessionUser = new { user.UserId, user.Username, user.FullName };
+            // store minimal user info in session (JSON) and include role
+            var sessionUser = new { user.UserId, user.Username, user.FullName, user.UserRole };
             HttpContext.Session.SetString("User", JsonSerializer.Serialize(sessionUser));
+
+            // Redirect admin to admin users page, regular users to home as before
+            if (!string.IsNullOrEmpty(user.UserRole) && user.UserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("users", "Admin");
+            }
 
             return RedirectToAction("Index", "Home");
         }
