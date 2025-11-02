@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessObjects;
+using Services.DTOs;
 
 namespace Services.Interfaces
 {
@@ -23,5 +24,11 @@ namespace Services.Interfaces
         Task<bool> BlockUserAsync(Guid userId);
         Task<byte[]?> ExportUsersAsync(string? q, string? status);
         Task<User?> GetUserByIdAsync(Guid id);
+        Task<UserProfileDto?> GetUserProfileAsync(Guid userId);
+        Task BlockUserAsync(Guid blockerId, BlockUserDto blockDto);
+        Task UnblockUserAsync(Guid blockerId, Guid blockedId);
+        public Task<bool> IsChatBlockedAsync(Guid userId1, Guid userId2);
+        Task<IEnumerable<UserProfileDto>> GetBlockedUsersAsync(Guid blockerId);
+
     }
 }

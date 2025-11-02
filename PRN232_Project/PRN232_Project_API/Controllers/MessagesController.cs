@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PRN232_Project_API.DTOs;
-using PRN232_Project_API.Services;
+
+using Services.DTOs;
+using Services.Interfaces;
 
 namespace PRN232_Project_API.Controllers
 {
     
     public class MessagesController : BaseApiController
     {
-        private readonly QIMessageService _messageService;
+        private readonly IMessageService _messageService;
 
-        public MessagesController(QIMessageService messageService)
+        public MessagesController(IMessageService messageService)
         {
             _messageService = messageService;
         }

@@ -1,4 +1,4 @@
-﻿namespace PRN232_Project_API.DTOs
+﻿namespace Services.DTOs
 {
     public class BlockUserDto
     {

@@ -6,7 +6,8 @@ using System.Text;
 using System.Net.Mail;
 using System.Net;
 using System.Threading.Tasks;
-
+using PRN232_Project_MVC.Models;
+using Services.DTOs;
 namespace PRN232_Project_MVC.Controllers
 {
     public class UserController : Controller
@@ -110,14 +111,76 @@ namespace PRN232_Project_MVC.Controllers
             ViewBag.User = await _apiService.GetUserByIdAsync(userId);
             return View("setting");
         }
-        public IActionResult block()
+        //
+        // 👇 ADD THIS ACTION (or REPLACE your old one)
+        // This fixes the 404 error by handling the GET request from the header link
+        //
+        [HttpGet]
+        public async Task<IActionResult> block()
         {
-            return View();
+            var userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return RedirectToAction("login");
+            }
+
+            // 1. Call the APIService to get the list of blocked users
+            var blockedUserDtos = await _apiService.GetBlockedUsersAsync();
+
+            // 2. Map DTOs to ViewModels (we can re-use FriendViewModel)
+            var blockedUsers = blockedUserDtos.Select(dto => new FriendViewModel
+            {
+                UserId = dto.UserId,
+                Username = dto.Username,
+                FullName = dto.FullName,
+                AvatarUrl = dto.AvatarUrl
+            }).ToList();
+
+            // 3. Pass the (now NOT null) list of users to the view
+            return View(blockedUsers);
         }
 
-        public IActionResult friend()
+        public async Task<IActionResult> friend()
         {
-            return View();
+            var userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return RedirectToAction("login");
+            }
+
+            // 1. Get the generic DTOs from the APIService
+            var friendDtos = await _apiService.GetFriendsAsync();
+
+            // 2. Map (convert) the DTOs to ViewModels
+            var friendViewModels = friendDtos.Select(dto => new FriendViewModel
+            {
+                UserId = dto.UserId,
+                Username = dto.Username,
+                FullName = dto.FullName,
+                AvatarUrl = dto.AvatarUrl,
+                IsBlocked = dto.IsBlocked // 👈 ADD THIS LINE
+            }).ToList();
+
+            // 3. Pass the list of ViewModels to the View
+            return View(friendViewModels);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Unblock(Guid blockedId)
+        {
+            // 1. Call your APIService to tell the API to unblock the user
+            var success = await _apiService.UnblockUserAsync(blockedId);
+
+            // 2. Redirect back to the page the user was on
+            //    We check the "Referer" header to see if they came
+            //    from the /User/friend or /User/block page.
+            if (Request.Headers["Referer"].ToString().Contains("/friend"))
+            {
+                return RedirectToAction("friend");
+            }
+            else
+            {
+                return RedirectToAction("block");
+            }
         }
 
         [HttpPost]
@@ -278,6 +341,105 @@ namespace PRN232_Project_MVC.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
+        }
+        // Add these two new actions inside your UserController class
+
+        //
+        // This action loads the chat page and fixes your 404 Not Found error
+        //
+        [HttpGet]
+        public async Task<IActionResult> Chat(Guid? friendId)
+        {
+            var userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return RedirectToAction("login");
+            }
+
+            // 1. Get the full friend list for the sidebar
+            var friendDtos = await _apiService.GetFriendsAsync(null); // Get all friends
+            var friendsList = friendDtos.Select(dto => new FriendViewModel
+            {
+                UserId = dto.UserId,
+                Username = dto.Username,
+                FullName = dto.FullName,
+                AvatarUrl = dto.AvatarUrl
+            }).ToList();
+
+            // 2. Create the view model
+            var viewModel = new ChatPageViewModel
+            {
+                Friends = friendsList
+            };
+
+            // 3. If a friendId was passed, get the chat history for that friend
+            if (friendId != null)
+            {
+                viewModel.ChattingWith = friendsList.FirstOrDefault(f => f.UserId == friendId);
+
+                if (viewModel.ChattingWith != null)
+                {
+                    viewModel.IsChatBlocked = await _apiService.CheckBlockStatusAsync(friendId.Value);
+                    // --------------------------
+
+                    // Get the conversation history from the API
+                    var messageDtos = await _apiService.GetConversationHistoryAsync(friendId.Value);
+
+                    // Map DTOs to MessageViewModels
+                    viewModel.ConversationHistory = messageDtos.Select(dto => new MessageViewModel
+                    {
+                        MessageId = dto.MessageId,
+                        SenderId = dto.SenderId,
+                        ReceiverId = dto.ReceiverId,
+                        Content = dto.Content,
+                        SentAt = dto.SentAt
+                    }).ToList();
+                }
+            }
+
+            // 4. Return the view with the complete model
+            return View(viewModel);
+        }
+
+        //
+        // This action is called by the JavaScript 'fetch' in chat.cshtml to save a message
+        //
+        [HttpPost]
+        public async Task<IActionResult> SaveMessage([FromBody] SendMessageDto message)
+        {
+            var userJson = HttpContext.Session.GetString("User");
+            if (string.IsNullOrEmpty(userJson))
+            {
+                return Unauthorized(); // User is not logged in
+            }
+
+            var success = await _apiService.SaveMessageAsync(message.ReceiverId, message.Content);
+
+            if (success)
+            {
+                return Ok(); // 200 OK
+            }
+            return BadRequest(); // 400 Bad Request
+        }
+        [HttpPost]
+        public async Task<IActionResult> Unfriend(Guid friendId)
+        {
+            // 1. Call your APIService to tell the API to unfriend the user
+            var success = await _apiService.UnfriendAsync(friendId);
+
+            // 2. Redirect back to the friend list page
+            return RedirectToAction("friend");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BlockUser(Guid blockedId)
+        {
+            // 1. Call your APIService to tell the API to block the user
+            //    We send 'null' for duration to mean "permanent"
+            var success = await _apiService.BlockUserAsync(blockedId, null);
+
+            // 2. Redirect back to the friend list page
+            return RedirectToAction("friend");
         }
     }
 }
