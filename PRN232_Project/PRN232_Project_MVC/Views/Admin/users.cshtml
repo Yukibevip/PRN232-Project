@@ -1,8 +1,18 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<BusinessObjects.User>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
+    // Lấy lại các giá trị filter để hiển thị trong các ô input
+    var currentFilter = ViewData["CurrentFilter"] as string ?? "";
+    var currentStatus = ViewData["CurrentStatus"] as string ?? "";
+
+    // Tính toán số liệu thống kê dựa trên trường 'Status'
+    int totalUsers = Model.Count();
+    int activeUsers = Model.Count(u => (u.Status ?? "Active").Equals("Active", StringComparison.OrdinalIgnoreCase));
+    int suspendedUsers = Model.Count(u => (u.Status ?? "").Equals("Suspended", StringComparison.OrdinalIgnoreCase));
+    int bannedUsers = Model.Count(u => (u.Status ?? "").Equals("Banned", StringComparison.OrdinalIgnoreCase));
 }
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -10,6 +20,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Người Dùng - Admin Dashboard</title>
     <style>
+        /* (CSS của bạn giữ nguyên) */
         * {
             margin: 0;
             padding: 0;
@@ -33,31 +44,31 @@
             background: #FFFFFF;
             padding: 24px 32px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             margin-bottom: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-            .header h1 {
-                font-size: 28px;
-                font-weight: 700;
-                color: #374151;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
         .header-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #00C2A8, #00D4B4);
+            background: linear-gradient(135deg,#00C2A8,#00D4B4);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #FFFFFF;
+            color: #FFF;
             font-size: 20px;
         }
 
@@ -75,80 +86,43 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all .3s;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-            .nav-btn:hover {
-                background: #00C2A8;
-                color: #FFFFFF;
-                transform: translateY(-2px);
-            }
+        .nav-btn:hover {
+            background: #00C2A8;
+            color: #FFF;
+            transform: translateY(-2px);
+        }
 
-            .nav-btn.active {
-                background: linear-gradient(135deg, #00C2A8, #00D4B4);
-                color: #FFFFFF;
-            }
+        .nav-btn.active {
+            background: linear-gradient(135deg,#00C2A8,#00D4B4);
+            color: #FFF;
+        }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
             gap: 20px;
             margin-bottom: 24px;
         }
 
         .stat-card {
-            background: #FFFFFF;
+            background: #FFF;
             padding: 24px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform .3s, box-shadow .3s;
         }
-
-            .stat-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 8px 30px rgba(0, 194, 168, 0.2);
-            }
-
-            .stat-card h3 {
-                font-size: 14px;
-                color: #6b7280;
-                font-weight: 600;
-                margin-bottom: 12px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .stat-change {
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-            .stat-change.positive {
-                color: #00C2A8;
-            }
-
-            .stat-change.negative {
-                color: #ef4444;
-            }
 
         .card {
-            background: #FFFFFF;
+            background: #FFF;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             padding: 28px;
         }
 
@@ -159,11 +133,11 @@
             margin-bottom: 24px;
         }
 
-            .card-header h2 {
-                font-size: 22px;
-                font-weight: 700;
-                color: #374151;
-            }
+        .card-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #374151;
+        }
 
         .search-filter-bar {
             display: flex;
@@ -178,20 +152,20 @@
             position: relative;
         }
 
-            .search-box input {
-                width: 100%;
-                padding: 12px 16px 12px 44px;
-                border: 2px solid #e5e7eb;
-                border-radius: 10px;
-                font-size: 14px;
-                transition: all 0.3s ease;
-            }
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all .3s;
+        }
 
-                .search-box input:focus {
-                    outline: none;
-                    border-color: #00C2A8;
-                    box-shadow: 0 0 0 3px rgba(0, 194, 168, 0.1);
-                }
+        .search-box input:focus {
+            outline: none;
+            border-color: #00C2A8;
+            box-shadow: 0 0 0 3px rgba(0,194,168,0.1);
+        }
 
         .search-icon {
             position: absolute;
@@ -209,50 +183,39 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            background: #FFFFFF;
+            background: #FFF;
             color: #374151;
-            transition: all 0.3s ease;
         }
-
-            .filter-select:focus {
-                outline: none;
-                border-color: #00C2A8;
-            }
 
         .btn-primary {
             padding: 12px 24px;
-            background: linear-gradient(135deg, #3366FF, #6FA3FF);
-            color: #FFFFFF;
+            background: linear-gradient(135deg,#3366FF,#6FA3FF);
+            color: #FFF;
             border: none;
             border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-            .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(51, 102, 255, 0.3);
-            }
-
         .table-container {
             overflow-x: auto;
             border-radius: 12px;
             border: 1px solid #e5e7eb;
+            background: #FFF;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: #FFFFFF;
+            background: #FFF;
         }
 
         thead {
-            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+            background: linear-gradient(135deg,#f9fafb,#f3f4f6);
         }
 
         th {
@@ -262,24 +225,21 @@
             font-weight: 700;
             color: #374151;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: .5px;
             border-bottom: 2px solid #e5e7eb;
         }
 
         td {
-            padding: 16px;
+            padding: 12px 16px;
             font-size: 14px;
             color: #374151;
             border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
         }
 
-        tbody tr {
-            transition: background-color 0.2s ease;
+        tbody tr:hover {
+            background: #f9fafb;
         }
-
-            tbody tr:hover {
-                background: #f9fafb;
-            }
 
         .user-cell {
             display: flex;
@@ -291,25 +251,13 @@
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #00C2A8, #00D4B4);
+            background: linear-gradient(135deg,#00C2A8,#00D4B4);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #FFFFFF;
+            color: #FFF;
             font-weight: 700;
             font-size: 16px;
-        }
-
-        .user-info h4 {
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 2px;
-        }
-
-        .user-info p {
-            font-size: 12px;
-            color: #9ca3af;
         }
 
         .badge {
@@ -319,27 +267,45 @@
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: .3px;
         }
 
-            .badge.active {
-                background: #d1fae5;
-                color: #00C2A8;
-            }
+        /* Styles for Status */
+        .badge.active {
+            background: #d1fae5;
+            color: #00C2A8;
+        }
 
-            .badge.suspended {
-                background: #fee2e2;
-                color: #ef4444;
-            }
+        .badge.suspended {
+            background: #fee2e2;
+            color: #ef4444;
+        }
 
-            .badge.banned {
-                background: #fef3c7;
-                color: #f59e0b;
-            }
+        .badge.banned {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        /* Styles for Role */
+        .badge.role-admin {
+            background: #c7d2fe; /* Light blue */
+            color: #4338ca;
+        }
+
+        .badge.role-user {
+            background: #e5e7eb; /* Light gray */
+            color: #4b5563;
+        }
+
 
         .action-buttons {
             display: flex;
             gap: 8px;
+        }
+
+        .action-form {
+            display: inline-block;
+            margin: 0 2px;
         }
 
         .btn-action {
@@ -349,7 +315,7 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all .3s;
         }
 
         .btn-edit {
@@ -357,30 +323,15 @@
             color: #3366FF;
         }
 
-            .btn-edit:hover {
-                background: #3366FF;
-                color: #FFFFFF;
-            }
-
         .btn-suspend {
             background: #fee2e2;
             color: #ef4444;
         }
 
-            .btn-suspend:hover {
-                background: #ef4444;
-                color: #FFFFFF;
-            }
-
         .btn-view {
             background: #e0f2f1;
             color: #00C2A8;
         }
-
-            .btn-view:hover {
-                background: #00C2A8;
-                color: #FFFFFF;
-            }
 
         .pagination {
             display: flex;
@@ -390,34 +341,93 @@
             margin-top: 24px;
         }
 
-            .pagination button {
-                padding: 10px 16px;
-                border: 1px solid #e5e7eb;
-                background: #FFFFFF;
-                color: #374151;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
+        /* modal / form styles */
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+            .modal.show {
+                display: flex;
             }
 
-                .pagination button:hover:not(:disabled) {
-                    background: #00C2A8;
-                    color: #FFFFFF;
-                    border-color: #00C2A8;
-                }
+        .modal-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 480px;
+            max-width: 95%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
 
-                .pagination button.active {
-                    background: linear-gradient(135deg, #00C2A8, #00D4B4);
-                    color: #FFFFFF;
-                    border-color: transparent;
-                }
+        .form-row {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
 
-                .pagination button:disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
+            .form-row label {
+                margin-bottom: 6px;
+                font-size: 13px;
+                color: #374151;
+                font-weight: 600;
+            }
+
+            .form-row input[type=text], .form-row input[type=email], .form-row input[type=password], .form-row select {
+                padding: 10px 12px;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                font-size: 14px; /* Ensure select also has font-size */
+            }
+
+        .gender-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
     </style>
 </head>
 <body>
@@ -428,244 +438,256 @@
                 Quản Lý Người Dùng
             </h1>
             <nav class="nav-menu">
-                <a href="users.html" class="nav-btn active">👥 Người Dùng</a>
-                <a href="friendlist.html" class="nav-btn">🤝 Bạn Bè</a>
-                <a href="accusations.html" class="nav-btn">⚠️ Tố Cáo</a>
-                <a href="logs.html" class="nav-btn">📊 Nhật Ký</a>
+                <a asp-controller="Admin" asp-action="Users" class="nav-btn active">👥 Người Dùng</a>
+                <a asp-controller="Admin" asp-action="Friendlist" class="nav-btn">🤝 Bạn Bè</a>
+                <a asp-controller="Admin" asp-action="Accusations" class="nav-btn">⚠️ Tố Cáo</a>
+                <a asp-controller="Admin" asp-action="Logs" class="nav-btn">📊 Nhật Ký</a>
             </nav>
         </div>
 
+      
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Tổng Người Dùng</h3>
-                <div class="stat-value">12,456</div>
-                <div class="stat-change positive">
-                    ↑ +12.5% so với tháng trước
-                </div>
+                <div class="stat-value" id="stat-total">@totalUsers</div>
+                <div class="stat-change positive">↑ +0% so với tháng trước</div>
             </div>
             <div class="stat-card">
                 <h3>Đang Hoạt Động</h3>
-                <div class="stat-value">11,234</div>
-                <div class="stat-change positive">
-                    ↑ +8.2% so với tháng trước
-                </div>
+                <div class="stat-value" id="stat-active">@activeUsers</div>
             </div>
             <div class="stat-card">
                 <h3>Bị Tạm Ngưng</h3>
-                <div class="stat-value">987</div>
-                <div class="stat-change negative">
-                    ↓ -3.1% so với tháng trước
-                </div>
+                <div class="stat-value" id="stat-suspended">@suspendedUsers</div>
             </div>
             <div class="stat-card">
                 <h3>Bị Cấm</h3>
-                <div class="stat-value">235</div>
-                <div class="stat-change positive">
-                    ↑ +5.4% so với tháng trước
-                </div>
+                <div class="stat-value" id="stat-banned">@bannedUsers</div>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
                 <h2>Danh Sách Người Dùng</h2>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <form asp-controller="Admin" asp-action="ExportUsers" method="get" id="exportForm" style="display: inline;">
+                        <input type="hidden" name="q" id="exportQuery" value="@currentFilter">
+                        <input type="hidden" name="status" id="exportStatus" value="@currentStatus">
+                        <button id="btnExport" type="submit" class="btn-primary">📥 Xuất .xlsx</button>
+                    </form>
+                    <button id="btnAddUser" class="btn-primary">+ Thêm Người Dùng</button>
+                </div>
             </div>
 
-            <div class="search-filter-bar">
+            <form asp-controller="Admin" asp-action="Users" method="get" class="search-filter-bar">
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
-                    <input type="text" placeholder="Tìm kiếm theo tên, email, số điện thoại...">
+                    <input id="searchInput" name="q" type="text" placeholder="Tìm kiếm theo tên, email..." value="@currentFilter">
                 </div>
-                <select class="filter-select">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="active">Đang hoạt động</option>
-                    <option value="suspended">Tạm ngưng</option>
-                    <option value="banned">Bị cấm</option>
+
+                <select id="statusFilter" name="status" class.bind="filter-select">
+                    <option value="" selected="@(currentStatus == "")">Tất cả trạng thái</option>
+                    <option value="Active" selected="@(currentStatus == "Active")">Đang hoạt động</option>
+                    <option value="Suspended" selected="@(currentStatus == "Suspended")">Tạm ngưng</option>
+                    <option value="Banned" selected="@(currentStatus == "Banned")">Bị cấm</option>
                 </select>
-                <select class="filter-select">
-                    <option value="">Sắp xếp theo</option>
-                    <option value="newest">Mới nhất</option>
-                    <option value="oldest">Cũ nhất</option>
-                    <option value="most_active">Hoạt động nhiều nhất</option>
-                </select>
-                <button class="btn-primary">
-                    <span>+</span> Thêm Người Dùng
-                </button>
-            </div>
+                <button id="btnSearch" type="submit" class="btn-primary">Tìm kiếm</button>
+            </form>
+            
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
 
             <div class="table-container">
                 <table>
                     <thead>
-                        <tr>
+                         <tr>
                             <th>Người Dùng</th>
-                            <th>Số Điện Thoại</th>
+                            <th>Email</th>
+                            <th>Giới tính</th>
+                            <th>Vai trò</th> 
                             <th>Trạng Thái</th>
-                            <th>Tin Nhắn</th>
-                            <th>Cuộc Gọi</th>
-                            <th>Hoạt Động Cuối</th>
-                            <th>Ngày Tạo</th>
+                            <th>ID (Ngắn)</th>
                             <th>Hành Động</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">NT</div>
-                                    <div class="user-info">
-                                        <h4>Nguyễn Văn Thành</h4>
-                                        <p>thanh.nguyen@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>+84 912 345 678</td>
-                            <td><span class="badge active">Hoạt động</span></td>
-                            <td>2,456</td>
-                            <td>189</td>
-                            <td>5 phút trước</td>
-                            <td>15/03/2024</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-view">Chi tiết</button>
-                                    <button class="btn-action btn-edit">Sửa</button>
-                                    <button class="btn-action btn-suspend">Khóa</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">LA</div>
-                                    <div class="user-info">
-                                        <h4>Lê Thị Anh</h4>
-                                        <p>anh.le@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>+84 987 654 321</td>
-                            <td><span class="badge active">Hoạt động</span></td>
-                            <td>1,823</td>
-                            <td>142</td>
-                            <td>12 phút trước</td>
-                            <td>20/02/2024</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-view">Chi tiết</button>
-                                    <button class="btn-action btn-edit">Sửa</button>
-                                    <button class="btn-action btn-suspend">Khóa</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">TV</div>
-                                    <div class="user-info">
-                                        <h4>Trần Minh Vũ</h4>
-                                        <p>vu.tran@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>+84 934 567 890</td>
-                            <td><span class="badge suspended">Tạm ngưng</span></td>
-                            <td>3,127</td>
-                            <td>234</td>
-                            <td>2 giờ trước</td>
-                            <td>10/01/2024</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-view">Chi tiết</button>
-                                    <button class="btn-action btn-edit">Sửa</button>
-                                    <button class="btn-action btn-suspend">Khóa</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">PH</div>
-                                    <div class="user-info">
-                                        <h4>Phạm Thị Hương</h4>
-                                        <p>huong.pham@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>+84 945 678 901</td>
-                            <td><span class="badge active">Hoạt động</span></td>
-                            <td>892</td>
-                            <td>67</td>
-                            <td>1 giờ trước</td>
-                            <td>05/04/2024</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-view">Chi tiết</button>
-                                    <button class="btn-action btn-edit">Sửa</button>
-                                    <button class="btn-action btn-suspend">Khóa</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">HQ</div>
-                                    <div class="user-info">
-                                        <h4>Hoàng Minh Quân</h4>
-                                        <p>quan.hoang@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>+84 923 456 789</td>
-                            <td><span class="badge banned">Bị cấm</span></td>
-                            <td>5,234</td>
-                            <td>423</td>
-                            <td>3 ngày trước</td>
-                            <td>28/12/2023</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-view">Chi tiết</button>
-                                    <button class="btn-action btn-edit">Sửa</button>
-                                    <button class="btn-action btn-suspend">Khóa</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">ĐM</div>
-                                    <div class="user-info">
-                                        <h4>Đỗ Văn Minh</h4>
-                                        <p>minh.do@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>+84 956 789 012</td>
-                            <td><span class="badge active">Hoạt động</span></td>
-                            <td>1,456</td>
-                            <td>98</td>
-                            <td>30 phút trước</td>
-                            <td>18/03/2024</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-view">Chi tiết</button>
-                                    <button class="btn-action btn-edit">Sửa</button>
-                                    <button class="btn-action btn-suspend">Khóa</button>
-                                </div>
-                            </td>
-                        </tr>
+                    <tbody id="usersBody">
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="user-avatar">
+                                                @((user.FullName?.Length > 0 ? user.FullName.Substring(0, 1) : (user.Username?.Length > 0 ? user.Username.Substring(0, 1) : "??")).ToUpper())
+                                            </div>
+                                            <div class="user-info">
+                                                <h4>@Html.DisplayFor(modelItem => user.FullName)</h4>
+                                                <p>@Html.DisplayFor(modelItem => user.Username)</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@Html.DisplayFor(modelItem => user.Email)</td>
+                                    <td>@Html.DisplayFor(modelItem => user.Gender)</td>
+                                    
+                                    <td>
+                                        @{
+                                            var role = (user.UserRole ?? "User").ToLower();
+                                            var roleClass = role == "admin" ? "role-admin" : "role-user";
+                                        }
+                                        <span class="badge @roleClass">@Html.DisplayFor(modelItem => user.UserRole)</span>
+                                    </td>
+
+                                    <td>
+                                        @{ 
+                                            var status = (user.Status ?? "Active").ToLower();
+                                            var badgeClass = "active";
+                                            if (status == "suspended") { badgeClass = "suspended"; }
+                                            else if (status == "banned") { badgeClass = "banned"; }
+                                        }
+                                        <span class="badge @badgeClass">@Html.DisplayFor(modelItem => user.Status)</span>
+                                    </td>
+                                    <td>@user.UserId.ToString().Substring(0, 8)</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            
+                                            <button class="btn-action btn-view" disabled title="Not implemented">Chi tiết</button>
+                                            <button class="btn-action btn-edit" disabled title="Not implemented">Sửa</button>
+
+                                            <form asp-controller="Admin" asp-action="ChangeStatus" method="post" class="action-form">
+                                                <input type="hidden" name="id" value="@user.UserId" />
+                                                @Html.AntiForgeryToken()
+                                                @if (user.Status?.ToLower() == "suspended")
+                                                {
+                                                    <input type="hidden" name="status" value="Active" />
+                                                    <button type="submit" class="btn-action" style="background-color: #28a745; color: white;">Kích hoạt</button>
+                                                }
+                                                else
+                                                {
+                                                    <input type="hidden" name="status" value="Suspended" />
+                                                    <button type="submit" class="btn-action btn-suspend">Tạm ngưng</button>
+                                                }
+                                            </form>
+
+                                            @if (user.Status?.ToLower() != "banned")
+                                            {
+                                                <form asp-controller="Admin" asp-action="BlockUser" method="post" class="action-form" onsubmit="return confirm('Bạn có chắc chắn muốn CHẶN người dùng này?');">
+                                                    <input type="hidden" name="id" value="@user.UserId" />
+                                                    <button type="submit" class="btn-action" style="background:#f59e0b;color:#fff;">Chặn</button>
+                                                    @Html.AntiForgeryToken()
+                                                </form>
+                                            }
+
+                                            <form asp-controller="Admin" asp-action="DeleteUser" method="post" class="action-form" onsubmit="return confirm('Xóa người dùng sẽ không thể khôi phục. Bạn có chắc?');">
+                                                <input type="hidden" name="id" value="@user.UserId" />
+                                                <button type="submit" class="btn-action" style="background:#ef4444;color:#fff;">Xóa</button>
+                                                @Html.AntiForgeryToken()
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 20px;">Không tìm thấy người dùng nào.</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
 
-            <div class="pagination">
-                <button disabled>← Trước</button>
-                <button class="active">1</button>
-                <button>2</button>
-                <button>3</button>
-                <button>4</button>
-                <button>5</button>
-                <button>Sau →</button>
-            </div>
+            <div class="pagination" id="pagination">
+                </div>
         </div>
     </div>
+
+    <div id="addModal" class="modal" aria-hidden="true">
+        <form class="modal-card" asp-controller="Admin" asp-action="AddUser" method="post" role="dialog" aria-modal="true" aria-labelledby="addUserTitle">
+            @Html.AntiForgeryToken()
+            <h3 id="addUserTitle">Thêm Người Dùng</h3>
+            <div class="form-row">
+                <label for="newUsername">Username</label>
+                <input id="newUsername" name="username" type="text" required />
+            </div>
+            <div class="form-row">
+                <label for="newEmail">Email</label>
+                <input id="newEmail" name="email" type="email" required />
+            </div>
+            <div class="form-row">
+                <label for="newFullname">Full name</label>
+                <input id="newFullname" name="fullName" type="text" />
+            </div>
+            <div class.form-row">
+                <label for="newPassword">Password</label>
+                <input id="newPassword" name="password" type="password" value="123456" />
+                <div class="small">Mặc định mật khẩu: 123456 (thay đổi sau)</div>
+            </div>
+            <div class="form-row">
+                <label>Gender</label>
+                <div class="gender-row">
+                    <label><input type="radio" name="gender" value="Male" checked /> Male</label>
+                    <label><input type="radio" name="gender" value="Female" /> Female</label>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <label for="newUserRole">Vai trò (Role)</label>
+                <select id="newUserRole" name="userRole" class="filter-select" style="width:100%;">
+                    <option value="User" selected>User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button id="cancelAdd" type="button" class="btn-secondary">Hủy</button>
+                <button id="confirmAdd" type="submit" class="btn-primary">Tạo</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        (function () {
+            const btnAddUser = document.getElementById('btnAddUser');
+            const addModal = document.getElementById('addModal');
+            const cancelAdd = document.getElementById('cancelAdd');
+
+            if (btnAddUser) {
+                btnAddUser.addEventListener('click', () => {
+                    addModal.classList.add('show');
+                });
+            }
+
+            if (cancelAdd) {
+                cancelAdd.addEventListener('click', (e) => {
+                    e.preventDefault(); 
+                    addModal.classList.remove('show');
+                });
+            }
+            
+            window.addEventListener('click', function (event) {
+                if (event.target == addModal) {
+                    addModal.classList.remove('show');
+                }
+            });
+
+            // Cập nhật giá trị filter/search cho form export
+            // (Không cần thiết nếu dùng asp-action và asp-route-q, nhưng để đây cho chắc)
+            const btnExport = document.getElementById('btnExport');
+            if (btnExport) {
+                btnExport.form.addEventListener('submit', function() {
+                    document.getElementById('exportQuery').value = document.getElementById('searchInput').value;
+                    document.getElementById('exportStatus').value = document.getElementById('statusFilter').value;
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
