@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataAccessObjects
 {
-    internal static class AccusationDAO
+    public class AccusationDAO
     {
     }
 }

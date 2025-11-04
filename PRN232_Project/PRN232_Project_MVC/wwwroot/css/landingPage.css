@@ -328,3 +328,44 @@ body {
     color: rgba(255,255,255,0.5);
     font-size: 0.9rem;
 }
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: auto;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: 2rem;
+}
+
+.user-greeting {
+    color: var(--light);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.logout-form {
+    margin: 0;
+}
+
+.btn-logout {
+    background: var(--accent);
+    color: var(--light);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.5rem 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-logout:hover, .btn-logout:focus {
+    background: #009e8a;
+    color: #fff;
+}

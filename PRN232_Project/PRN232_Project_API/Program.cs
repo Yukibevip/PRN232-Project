@@ -1,4 +1,6 @@
-
+using DataAccessObjects;
+using Microsoft.EntityFrameworkCore;
+using PRN232_Project_API.Services;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
@@ -12,13 +14,34 @@ namespace PRN232_Project_API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // optional: load configuration file
+            builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
+            // Add services to the container.
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // DB connection (use one registration only)
+            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB")
+                                   ?? builder.Configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("Connection string 'MyCallioDB' or 'DefaultConnection' is not configured.");
+
+            builder.Services.AddDbContext<CallioTestContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            // Register DAOs (they depend on CallioTestContext)
+            builder.Services.AddScoped<UserDAO>();
+            builder.Services.AddScoped<BlockListDAO>();
+            builder.Services.AddScoped<AccusationDAO>();
+            builder.Services.AddScoped<FriendListDAO>();
+            builder.Services.AddScoped<FriendInvitationDAO>();
+            builder.Services.AddScoped<LogDAO>();
+            builder.Services.AddScoped<MessageDAO>();
+            // add other DAOs here if you have them
+
+            // Register repositories (they depend on DAOs)
             builder.Services.AddScoped<IAccusationRepository, AccusationRepository>();
             builder.Services.AddScoped<IBlockListRepository, BlockListRepository>();
             builder.Services.AddScoped<IFriendInvitationRepository, FriendInvitationRepository>();
@@ -27,30 +50,58 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+            // Register services
             builder.Services.AddScoped<IAccusationService, AccusationService>();
             builder.Services.AddScoped<IBlockListService, BlockListService>();
-            builder.Services.AddScoped<IFriendInvitationService, FriendInvitationService>();
-            builder.Services.AddScoped<IFriendListService, FriendListService>();
+            builder.Services.AddScoped<IFriendService, FriendService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<QIUserService, QUserService>();
 
+
+            // Admin service (typed http client) if needed
+
+            builder.Services.AddSignalR();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin() // Allows requests from any address
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+            //db connection
+            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
+            builder.Services.AddDbContext<CallioTestContext>(options =>
+            options.UseSqlServer(connectionString));
+            //end db connection
+            // Add Swagger for API testing
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            // End Swagger configuration
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+            }
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
+            app.UseRouting();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
+            app.MapHub<ChatHub>("/chatHub"); 
             app.Run();
         }
     }

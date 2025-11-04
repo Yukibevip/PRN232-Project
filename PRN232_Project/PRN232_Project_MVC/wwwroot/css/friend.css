@@ -22,47 +22,124 @@ body {
     color: var(--dark);
 }
 
-/* New Header */
+/* Header layout: single row with nav on left and user actions on right */
 .main-header {
     background-color: var(--light);
     border-bottom: 1px solid var(--border);
-    padding: 0.75rem 0; /* Short header */
+    padding: 0.65rem 0;
     width: 100%;
 }
 
 .header-container {
-    width: 90%;
-    max-width: 800px;
+    width: 92%;
+    max-width: 1100px;
     margin: 0 auto;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
+/* Logo aligned left */
 .logo {
     font-weight: 700;
     font-size: 1.5rem;
     color: var(--primary);
     text-decoration: none;
+    margin-right: 1rem;
 }
 
-.main-nav a {
-    color: var(--grey);
-    text-decoration: none;
-    margin-left: 1.5rem;
-    font-weight: 500;
-    transition: color 0.2s ease;
+/* Main nav holds the primary links and the user-actions container */
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
 }
 
-    .main-nav a:hover {
-        color: var(--primary);
+    /* Link group (left) - keep grouping separate from user-actions */
+    .main-nav > a,
+    .main-nav > .nav-group > a {
+        color: var(--grey);
+        text-decoration: none;
+        margin-left: 0.5rem;
+        font-weight: 500;
+        transition: color 0.2s ease;
     }
 
-    .main-nav a.active {
-        color: var(--primary);
-        font-weight: 700;
+        .main-nav > a:hover,
+        .main-nav > .nav-group > a:hover {
+            color: var(--primary);
+        }
+
+        .main-nav > a.active,
+        .main-nav > .nav-group > a.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+/* Place nav links (left) in a nav-group so we can push user-actions to right */
+.nav-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* user-actions pushed to the far right */
+.user-actions {
+    margin-left: auto; /* pushes this block to the right end of the header row */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* greeting and logout styles */
+.user-greeting {
+    color: var(--dark);
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+
+/* logout button styled as pill */
+.btn-logout {
+    background: var(--accent);
+    color: var(--light);
+    border: none;
+    border-radius: 999px;
+    padding: 0.35rem 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+    .btn-logout:hover,
+    .btn-logout:focus {
+        background: #009e8a;
+        color: #fff;
     }
 
+/* Responsive: collapse spacing on small screens */
+@media (max-width: 768px) {
+    .header-container {
+        width: 95%;
+        gap: 0.5rem;
+    }
+
+    .nav-group {
+        gap: 0.5rem;
+    }
+
+    .user-greeting {
+        display: none; /* hide long name on very small screens */
+    }
+
+    .btn-logout {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* rest of friend styles unchanged (kept from original) */
 .container {
     width: 90%;
     max-width: 800px;
@@ -110,6 +187,7 @@ body {
     border: 1px solid var(--border);
 }
 
+/* ... keep other friend styles unchanged ... */
 .friend-item {
     display: flex;
     align-items: center;

@@ -1,0 +1,22 @@
+﻿@{
+    ViewBag.Title = "Verify OTP";
+}
+<link href="~/css/account-recovery.css" rel="stylesheet" />
+<div class="recovery-container">
+    <div class="recovery-title">Verify OTP</div>
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+    <form class="recovery-form" method="post" asp-action="VerifyOtp">
+        <input type="hidden" name="email" value="@ViewBag.Email" />
+        <div class="form-group">
+            <label for="otp">OTP Code</label>
+            <input type="text" name="otp" id="otp" required maxlength="6" />
+        </div>
+        <button type="submit" class="btn-primary">Verify</button>
+    </form>
+    <div class="recovery-link">
+        <a href="@Url.Action("ForgotPassword", "User")">Resend OTP</a>
+    </div>
+</div>

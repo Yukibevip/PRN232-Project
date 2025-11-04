@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataAccessObjects
 {
-    internal static class LogDAO
+    public class LogDAO
     {
     }
 }
