@@ -11,6 +11,6 @@ namespace Services.Interfaces
     public interface IMessageService
     {
         Task CreateMessageAsync(Guid senderId, SendMessageDto messageDto);
-        Task<List<Message>> GetConversationAsync(Guid userId1, Guid userId2);
+        Task<List<MessageDto>> GetConversationAsync(Guid userId1, Guid userId2);
     }
 }

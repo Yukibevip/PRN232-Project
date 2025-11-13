@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PRN232_Project_MVC.Models;
 using Services;
 using Services.Interfaces;
@@ -25,11 +25,17 @@ namespace PRN232_Project_MVC
             builder.Services.AddScoped<IUserService, UserService>();
 
             // APIService registration (if present)
-            var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7098";
-            builder.Services.AddHttpClient<Services.APIService>(client =>
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            // 2. Register your custom handler as a transient service
+
+            // 3. Register your APIService and attach the handler
+            var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7098"; // 👈 Make sure this port is your API port
+            builder.Services.AddHttpClient<APIService>(client =>
             {
                 client.BaseAddress = new Uri(apiBase);
             });
+
 
             // Enable session
             builder.Services.AddDistributedMemoryCache();

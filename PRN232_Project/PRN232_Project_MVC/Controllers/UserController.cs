@@ -196,6 +196,7 @@ namespace PRN232_Project_MVC.Controllers
             // store minimal user info in session (JSON)
             var sessionUser = new { user.UserId, user.Username, user.FullName };
             HttpContext.Session.SetString("User", JsonSerializer.Serialize(sessionUser));
+            await _apiService.LoginToDemoAsync(user.UserId);
 
             return RedirectToAction("Index", "Home");
         }

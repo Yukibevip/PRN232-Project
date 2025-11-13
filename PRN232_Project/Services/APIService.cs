@@ -213,5 +213,10 @@ namespace Services
             var response = await _http.DeleteAsync($"api/Users/unblock/{blockedId}");
             return response.IsSuccessStatusCode;
         }
+        public async Task LoginToDemoAsync(Guid userId)
+        {
+            await _http.PostAsJsonAsync("api/users/login-demo", userId);
+        }
+
     }
 }
