@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using BusinessObjects;
 using Services.Interfaces;
 using Services;
+using AutoMapper;
+using BusinessObjects.Dto;
 
 namespace PRN232_Project_API.Controllers
 {
@@ -15,10 +17,14 @@ namespace PRN232_Project_API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IUserService _adminService;
+        private readonly IAccusationService _accusationService;
+        private readonly IMapper _mapper;
 
-        public AdminController(IUserService adminService)
+        public AdminController(IUserService adminService, IAccusationService accusationService, IMapper mapper)
         {
             _adminService = adminService;
+            _accusationService = accusationService;
+            _mapper = mapper;
         }
 
         // GET: api/admin/users
@@ -107,6 +113,47 @@ namespace PRN232_Project_API.Controllers
             if (bytes == null || bytes.Length == 0) return NotFound();
 
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "users.xlsx");
+        }
+
+        [HttpGet("accusations")]
+        public async Task<ActionResult<IEnumerable<Accusation>>> GetAccusations()
+        {
+            var accusations = await _accusationService.GetAll();
+            var dtos = _mapper.Map<IEnumerable<AccusationDto>>(accusations);
+            return dtos is null ? NotFound() : Ok(dtos);
+        }
+
+        [HttpGet("accusations/{id}")]
+        public async Task<ActionResult<Accusation>> GetAccusation(int id)
+        {
+            var accusation = await _accusationService.Get(id);
+            return accusation is null ? NotFound() : Ok(accusation);
+        }
+
+        [HttpPost("accusations")]
+        public async Task<ActionResult<Accusation>> CreateAccusation([FromBody] Accusation accusation)
+        {
+            if (accusation == null) return BadRequest();
+            var ok = await _accusationService.Add(accusation);
+            if (!ok) return BadRequest(new { error = "Failed to create accusation." });
+            return CreatedAtAction(nameof(GetAccusation), new { id = accusation.AccusationId }, accusation);
+        }
+
+        [HttpPut("accusations/{id}")]
+        public async Task<IActionResult> UpdateAccusation(int id, [FromBody] Accusation accusation)
+        {
+            if (accusation == null || accusation.AccusationId != id) return BadRequest();
+            var ok = await _accusationService.Update(accusation);
+            if (!ok) return NotFound(new { error = "Accusation not found or update failed." });
+            return Ok();
+        }
+
+        [HttpDelete("accusations/{id}")]
+        public async Task<IActionResult> DeleteAccusation(int id)
+        {
+            var ok = await _accusationService.Delete(id);
+            if (!ok) return NotFound();
+            return Ok();
         }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using BusinessObjects;
 using Services.Interfaces; // Đảm bảo bạn đang sử dụng Interface
+using PRN232_Project_MVC.ServicesMVC.Interfaces;
 using System.Linq;
 
 namespace PRN232_Project_MVC.Controllers
@@ -12,10 +13,12 @@ namespace PRN232_Project_MVC.Controllers
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly ServicesMVC.Interfaces.IAccusationService _accusationService;
 
-        public AdminController(IAdminService adminService) // Sử dụng Interface
+        public AdminController(IAdminService adminService, ServicesMVC.Interfaces.IAccusationService accusationService) // Sử dụng Interface
         {
             _adminService = adminService;
+            _accusationService = accusationService;
         }
 
         public IActionResult Index()
@@ -23,16 +26,20 @@ namespace PRN232_Project_MVC.Controllers
             return RedirectToAction("Users"); // Chuyển hướng đến trang Users làm trang chính
         }
 
-        public IActionResult Accusations()
+        [HttpGet("accusations")]
+        public async Task<IActionResult> Accusations()
         {
-            return View();
+            var accusations = await _accusationService.GetAll();
+            return View(accusations);
         }
 
+        [HttpGet("friendlist")]
         public IActionResult Friendlist()
         {
             return View();
         }
 
+        [HttpGet("logs")]
         public IActionResult Logs()
         {
             return View();

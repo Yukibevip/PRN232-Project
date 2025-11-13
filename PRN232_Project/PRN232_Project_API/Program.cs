@@ -1,6 +1,6 @@
 using DataAccessObjects;
 using Microsoft.EntityFrameworkCore;
-using PRN232_Project_API.Services;
+using PRN232_Project_API.AutoMapping;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
@@ -31,10 +31,11 @@ namespace PRN232_Project_API
             builder.Services.AddDbContext<CallioTestContext>(options =>
                 options.UseSqlServer(connectionString));
 
+            builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
+
             // Register DAOs (they depend on CallioTestContext)
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<BlockListDAO>();
-            builder.Services.AddScoped<AccusationDAO>();
             builder.Services.AddScoped<FriendListDAO>();
             builder.Services.AddScoped<FriendInvitationDAO>();
             builder.Services.AddScoped<LogDAO>();
@@ -57,7 +58,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<QIUserService, QUserService>();
+            //builder.Services.AddScoped<QIUserService, QUserService>();
 
 
             // Admin service (typed http client) if needed
@@ -73,11 +74,7 @@ namespace PRN232_Project_API
                               .AllowAnyMethod();
                     });
             });
-            //db connection
-            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
-            builder.Services.AddDbContext<CallioTestContext>(options =>
-            options.UseSqlServer(connectionString));
-            //end db connection
+            
             // Add Swagger for API testing
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

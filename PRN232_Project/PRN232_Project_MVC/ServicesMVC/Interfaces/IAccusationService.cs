@@ -1,13 +1,13 @@
-﻿using BusinessObjects;
+﻿using PRN232_Project_MVC.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Repositories.Interfaces
+namespace PRN232_Project_MVC.ServicesMVC.Interfaces
 {
-    public interface IAccusationRepository
+    public interface IAccusationService
     {
         public Task<IEnumerable<Accusation>> GetAll();
         public Task<Accusation> Get(int id);

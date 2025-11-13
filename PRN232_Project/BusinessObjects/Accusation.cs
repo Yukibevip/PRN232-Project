@@ -21,7 +21,7 @@ public partial class Accusation
 
     public DateTime ReviewAt { get; set; }
 
-    public Guid ReviewedBy { get; set; }
+    public Guid? ReviewedBy { get; set; }
 
     public string? ResolutionNote { get; set; }
 

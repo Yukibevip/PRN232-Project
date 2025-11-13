@@ -1,7 +1,8 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<PRN232_Project_MVC.Models.Accusation>
+
 @{
+    var accusationJson = System.Text.Json.JsonSerializer.Serialize(Model);
+    Console.WriteLine(accusationJson);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -482,28 +483,28 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Tổng Tố Cáo</h3>
-                <div class="stat-value">3,456</div>
+                <div class="stat-value">@Model.Where(a => a.CreatedAt > DateTime.Now.AddMonths(-1)).Count()</div>
                 <div class="stat-change negative">
                     ↑ +23.5% so với tháng trước
                 </div>
             </div>
             <div class="stat-card">
                 <h3>Đang Chờ Xử Lý</h3>
-                <div class="stat-value">1,234</div>
+                <div class="stat-value">@Model.Where(a => a.CreatedAt > DateTime.Now.AddMonths(-1) && a.Status == "Pending").Count()</div>
                 <div class="stat-change negative">
                     ↑ +15.7% so với tháng trước
                 </div>
             </div>
             <div class="stat-card">
                 <h3>Đang Xem Xét</h3>
-                <div class="stat-value">876</div>
+                <div class="stat-value">@Model.Where(a => a.CreatedAt > DateTime.Now.AddMonths(-1) && a.Status == "Reviewing").Count()</div>
                 <div class="stat-change positive">
                     ↓ -8.2% so với tháng trước
                 </div>
             </div>
             <div class="stat-card">
                 <h3>Đã Giải Quyết</h3>
-                <div class="stat-value">1,346</div>
+                <div class="stat-value">@Model.Where(a => a.CreatedAt > DateTime.Now.AddMonths(-1) && a.Status == "Resolved").Count()</div>
                 <div class="stat-change positive">
                     ↑ +34.1% so với tháng trước
                 </div>
@@ -557,6 +558,43 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach (var accusation in Model)
+                        {
+                            <tr data-id="@accusation.AccusationId">
+                                <td><strong>#@accusation.AccusationId</strong></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar">NT</div>
+                                        <div class="user-info">
+                                            <h4>@accusation.Reported.Username</h4>
+                                            <p>@accusation.Reported.Email</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar accused">HQ</div>
+                                        <div class="user-info">
+                                            <h4>@accusation.Accused.Username</h4>
+                                            <p>@accusation.Accused.Email</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="reason-cell">
+                                    <div class="priority-badge @accusation.Category.ToLower()">@accusation.Category</div>
+                                    <div class="reason-text">@accusation.Descriptions</div>
+                                </td>
+                                <td><span class="badge @accusation.Status.ToLower()">@accusation.Status</span></td>
+                                <td>@accusation.CreatedAt</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-action btn-review">Xem xét</button>
+                                        <button class="btn-action btn-resolve">Giải quyết</button>
+                                        <button class="btn-action btn-reject">Từ chối</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                         <tr>
                             <td><strong>#1234</strong></td>
                             <td>
@@ -778,3 +816,9 @@
     </div>
 </body>
 </html>
+
+<script>
+    let accusations = '@accusationJson';
+    accusations = accusations.replace(/&quot;/g, '"');
+</script>
+<script src="~/js/accusation.js"></script>

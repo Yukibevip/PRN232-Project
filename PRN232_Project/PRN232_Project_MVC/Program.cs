@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PRN232_Project_MVC.Hubs;
 using PRN232_Project_MVC.Models;
 using Services;
 using Services.Interfaces;
@@ -16,13 +17,15 @@ namespace PRN232_Project_MVC
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddScoped<IAccusationService, AccusationService>();
+            builder.Services.AddScoped<PRN232_Project_MVC.ServicesMVC.Interfaces.IAccusationService, PRN232_Project_MVC.ServicesMVC.AccusationService>();
             builder.Services.AddScoped<IBlockListService, BlockListService>();
             builder.Services.AddScoped<IFriendInvitationService, FriendInvitationService>();
             builder.Services.AddScoped<IFriendListService, FriendListService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
+
+            builder.Services.AddSignalR();
 
             // APIService registration (if present)
             var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7098";
@@ -33,6 +36,11 @@ namespace PRN232_Project_MVC
 
             // Register AdminService as a typed HTTP client implementing IAdminService
             builder.Services.AddHttpClient<IAdminService, AdminService>(client =>
+            {
+                client.BaseAddress = new Uri(apiBase);
+            });
+
+            builder.Services.AddHttpClient<PRN232_Project_MVC.ServicesMVC.Interfaces.IAccusationService, PRN232_Project_MVC.ServicesMVC.AccusationService>(client =>
             {
                 client.BaseAddress = new Uri(apiBase);
             });
@@ -67,6 +75,8 @@ namespace PRN232_Project_MVC
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapHub<VideoChatHub>("/videoChatHub");
 
             app.Run();
         }
