@@ -2,7 +2,7 @@
 
 @{
     var accusationJson = System.Text.Json.JsonSerializer.Serialize(Model);
-    Console.WriteLine(accusationJson);
+    var accusation3 = Model.SkipLast(Model.Count() - 5);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -558,7 +558,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var accusation in Model)
+                        @foreach (var accusation in accusation3)
                         {
                             <tr data-id="@accusation.AccusationId">
                                 <td><strong>#@accusation.AccusationId</strong></td>
@@ -595,210 +595,6 @@
                                 </td>
                             </tr>
                         }
-                        <tr>
-                            <td><strong>#1234</strong></td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">NT</div>
-                                    <div class="user-info">
-                                        <h4>Nguyễn Văn Thành</h4>
-                                        <p>thanh.nguyen@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar accused">HQ</div>
-                                    <div class="user-info">
-                                        <h4>Hoàng Minh Quân</h4>
-                                        <p>quan.hoang@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="reason-cell">
-                                <div class="priority-badge high">CAO</div>
-                                <div class="reason-text">Gửi nội dung spam liên tục, quấy rối và sử dụng ngôn từ không phù hợp trong cuộc trò chuyện.</div>
-                            </td>
-                            <td><span class="badge pending">Đang chờ</span></td>
-                            <td>23/04/2024 14:30</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-review">Xem xét</button>
-                                    <button class="btn-action btn-resolve">Giải quyết</button>
-                                    <button class="btn-action btn-reject">Từ chối</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>#1233</strong></td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">LA</div>
-                                    <div class="user-info">
-                                        <h4>Lê Thị Anh</h4>
-                                        <p>anh.le@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar accused">TV</div>
-                                    <div class="user-info">
-                                        <h4>Trần Minh Vũ</h4>
-                                        <p>vu.tran@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="reason-cell">
-                                <div class="priority-badge medium">TRUNG BÌNH</div>
-                                <div class="reason-text">Chia sẻ thông tin cá nhân của người khác mà không được phép.</div>
-                            </td>
-                            <td><span class="badge reviewed">Đang xem xét</span></td>
-                            <td>23/04/2024 10:15</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-review">Xem xét</button>
-                                    <button class="btn-action btn-resolve">Giải quyết</button>
-                                    <button class="btn-action btn-reject">Từ chối</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>#1232</strong></td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">PH</div>
-                                    <div class="user-info">
-                                        <h4>Phạm Thị Hương</h4>
-                                        <p>huong.pham@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar accused">ĐM</div>
-                                    <div class="user-info">
-                                        <h4>Đỗ Văn Minh</h4>
-                                        <p>minh.do@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="reason-cell">
-                                <div class="priority-badge high">CAO</div>
-                                <div class="reason-text">Đe dọa và hành vi bắt nạt trực tuyến, gây tổn hại tinh thần.</div>
-                            </td>
-                            <td><span class="badge pending">Đang chờ</span></td>
-                            <td>22/04/2024 16:45</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-review">Xem xét</button>
-                                    <button class="btn-action btn-resolve">Giải quyết</button>
-                                    <button class="btn-action btn-reject">Từ chối</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>#1231</strong></td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">BL</div>
-                                    <div class="user-info">
-                                        <h4>Bùi Thị Lan</h4>
-                                        <p>lan.bui@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar accused">VT</div>
-                                    <div class="user-info">
-                                        <h4>Vũ Đức Thắng</h4>
-                                        <p>thang.vu@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="reason-cell">
-                                <div class="priority-badge low">THẤP</div>
-                                <div class="reason-text">Sử dụng hình ảnh profile không phù hợp với cộng đồng.</div>
-                            </td>
-                            <td><span class="badge resolved">Đã giải quyết</span></td>
-                            <td>22/04/2024 09:20</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-review">Xem xét</button>
-                                    <button class="btn-action btn-resolve">Giải quyết</button>
-                                    <button class="btn-action btn-reject">Từ chối</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>#1230</strong></td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">NK</div>
-                                    <div class="user-info">
-                                        <h4>Ngô Thị Kim</h4>
-                                        <p>kim.ngo@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar accused">LH</div>
-                                    <div class="user-info">
-                                        <h4>Lý Văn Hùng</h4>
-                                        <p>hung.ly@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="reason-cell">
-                                <div class="priority-badge medium">TRUNG BÌNH</div>
-                                <div class="reason-text">Quảng cáo dịch vụ không được phép trong tin nhắn cá nhân.</div>
-                            </td>
-                            <td><span class="badge reviewed">Đang xem xét</span></td>
-                            <td>21/04/2024 13:50</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-review">Xem xét</button>
-                                    <button class="btn-action btn-resolve">Giải quyết</button>
-                                    <button class="btn-action btn-reject">Từ chối</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>#1229</strong></td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar">ĐH</div>
-                                    <div class="user-info">
-                                        <h4>Đặng Thị Hà</h4>
-                                        <p>ha.dang@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="user-avatar accused">PT</div>
-                                    <div class="user-info">
-                                        <h4>Phan Minh Tuấn</h4>
-                                        <p>tuan.phan@email.com</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="reason-cell">
-                                <div class="priority-badge high">CAO</div>
-                                <div class="reason-text">Lừa đảo và yêu cầu chuyển tiền với lý do không chính đáng.</div>
-                            </td>
-                            <td><span class="badge resolved">Đã giải quyết</span></td>
-                            <td>21/04/2024 08:30</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-action btn-review">Xem xét</button>
-                                    <button class="btn-action btn-resolve">Giải quyết</button>
-                                    <button class="btn-action btn-reject">Từ chối</button>
-                                </div>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
