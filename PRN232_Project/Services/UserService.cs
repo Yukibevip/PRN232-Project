@@ -35,6 +35,34 @@ namespace Services
         public void UpdatePassword(int userId, string newPassword)
             => _repo.UpdatePassword(userId, newPassword);
 
+        // --- Admin / management methods forward to repository ---
+
+        public Task<List<User>?> GetAllUsersAsync()
+            => _repo.GetAllUsersAsync();
+
+        public Task<List<User>?> GetUsersAsync()
+            => _repo.GetAllUsersAsync();
+
+        public Task<List<User>?> SearchUsersAsync(string? q, string? status)
+            => _repo.SearchUsersAsync(q, status);
+
+        public Task<bool> CreateUserAsync(User user)
+            => _repo.CreateUserAsync(user);
+
+        public Task<bool> ChangeUserStatusAsync(Guid userId, string status)
+            => _repo.ChangeStatusAsync(userId, status);
+
+        public Task<bool> DeleteUserAsync(Guid userId)
+            => _repo.DeleteUserAsync(userId);
+
+        public Task<bool> BlockUserAsync(Guid userId)
+            => _repo.BlockUserAsync(userId);
+
+        public Task<byte[]?> ExportUsersAsync(string? q, string? status)
+            => _repo.ExportUsersAsync(q, status);
+
+        public Task<User?> GetUserByIdAsync(Guid id)
+            => _repo.GetUserById(id);
 
        
 

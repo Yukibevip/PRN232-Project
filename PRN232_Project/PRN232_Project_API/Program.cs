@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using DataAccessObjects;
+using Microsoft.EntityFrameworkCore;
+using PRN232_Project_API.Services;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
@@ -24,9 +25,11 @@ namespace PRN232_Project_API
 
             // Register DAOs
             builder.Services.AddScoped<UserDAO>();
+            builder.Services.AddScoped<BlockListDAO>();
+            builder.Services.AddScoped<AccusationDAO>();
             builder.Services.AddScoped<FriendListDAO>();
             builder.Services.AddScoped<FriendInvitationDAO>();
-            builder.Services.AddScoped<BlockListDAO>();
+            builder.Services.AddScoped<LogDAO>();
             builder.Services.AddScoped<MessageDAO>();
 
             // Register repositories

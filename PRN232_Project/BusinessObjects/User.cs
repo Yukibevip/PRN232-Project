@@ -23,6 +23,7 @@ public partial class User
     public string? GoogleId { get; set; }
 
     public string? UserRole { get; set; }
+    public string? Status { get; set; }
 
     public virtual ICollection<Accusation> AccusationAccuseds { get; set; } = new List<Accusation>();
 
