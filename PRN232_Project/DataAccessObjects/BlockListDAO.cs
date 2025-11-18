@@ -1,4 +1,6 @@
-﻿using BusinessObjects;
+﻿using AutoMapper;
+using BusinessObjects;
+using BusinessObjects.Dto;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,12 @@ namespace DataAccessObjects
     public class BlockListDAO
     {
         private readonly CallioTestContext _context;
-        public BlockListDAO(CallioTestContext context) { _context = context; }
+        private readonly IMapper _mapper;
+        public BlockListDAO(CallioTestContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
         public Task<BlockList?> GetBlockRecord(Guid blockerId, Guid blockedId)
         {
@@ -60,6 +67,13 @@ namespace DataAccessObjects
         {
             // This is a one-way check
             return _context.BlockLists.AnyAsync(b => b.BlockerId == blockerId && b.BlockedId == blockedId);
+        }
+
+        public async Task<IEnumerable<BlockListDto>> GetBlockLists()
+        {
+            var result = await _context.BlockLists.Include(b => b.Blocker).Include(b => b.Blocked).ToListAsync();
+            var dto = _mapper.Map<IEnumerable<BlockList>, IEnumerable<BlockListDto>>(result);
+            return dto;
         }
     }
 }

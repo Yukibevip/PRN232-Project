@@ -1,4 +1,5 @@
-﻿using Repositories.Interfaces;
+﻿using BusinessObjects.Dto;
+using Repositories.Interfaces;
 using Services.DTOs;
 using Services.Interfaces;
 using System;
@@ -56,6 +57,26 @@ namespace Services
         public Task UnfriendAsync(Guid currentUserId, Guid friendId)
         {
             return _friendListRepo.Unfriend(currentUserId, friendId);
+        }
+
+        public async Task<IEnumerable<FriendListDto>> GetFriendLists()
+        {
+            return await _friendListRepo.GetFriendLists();
+        }
+
+        public async Task<IEnumerable<FriendInvitationDto>> GetFriendInvitations()
+        {
+            return await _invitationRepo.GetFriendInvitations();
+        }
+
+        public async Task<bool> RemoveFriendShip(Guid userId1, Guid userId2)
+        {
+            return await _friendListRepo.RemoveFriendShip(userId1, userId2);
+        }
+
+        public async Task<bool> RemoveFriendInvitation(Guid userId1, Guid userId2)
+        {
+            return await _invitationRepo.RemoveFriendInvitation(userId1, userId2);
         }
     }
 }

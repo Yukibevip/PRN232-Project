@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using BusinessObjects.Dto;
 using DataAccessObjects;
 using Repositories.Interfaces;
 using System;
@@ -35,6 +36,11 @@ namespace Repositories
     {
         return _messageDAO.GetConversationHistory(userId1, userId2);
     }
-}
+
+        public async Task<IEnumerable<MessageDto>> GetMessages()
+        {
+            return await _messageDAO.GetMessages();
+        }
     }
+}
 

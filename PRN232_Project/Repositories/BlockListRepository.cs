@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using BusinessObjects.Dto;
 using DataAccessObjects;
 using Repositories.Interfaces;
 using System;
@@ -53,6 +54,11 @@ namespace Repositories
         {
             // Call the DAO to check if a block exists in either direction
             return _blockListDAO.CheckForBlock(userId1, userId2);
+        }
+
+        public async Task<IEnumerable<BlockListDto>> GetBlockLists()
+        {
+            return await _blockListDAO.GetBlockLists();
         }
     }
 }

@@ -40,6 +40,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<FriendInvitationDAO>();
             builder.Services.AddScoped<LogDAO>();
             builder.Services.AddScoped<MessageDAO>();
+            builder.Services.AddScoped<BlockListDAO>();
             // add other DAOs here if you have them
 
             // Register repositories (they depend on DAOs)
@@ -50,6 +51,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogRepository, LogRepository>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IBlockListRepository, BlockListRepository>();
 
             // Register services
             builder.Services.AddScoped<IAccusationService, AccusationService>();
@@ -58,7 +60,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            //builder.Services.AddScoped<QIUserService, QUserService>();
+            builder.Services.AddScoped<IBlockListService, BlockListService>();
 
 
             // Admin service (typed http client) if needed

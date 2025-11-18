@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using BusinessObjects;
-using BusinessObjects.Dto;
+using PRN232_Project_MVC.Models;
+using PRN232_Project_MVC.Models.Dto;
 
-namespace PRN232_Project_API.AutoMapping
+namespace PRN232_Project_MVC.AutoMapping
 {
     public class MappingProfile : Profile
     {

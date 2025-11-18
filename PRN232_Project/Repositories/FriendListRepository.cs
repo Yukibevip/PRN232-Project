@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using BusinessObjects.Dto;
 using DataAccessObjects;
 using Repositories.Interfaces;
 using System;
@@ -26,12 +27,22 @@ namespace Repositories
             return _friendListDAO.AreUsersFriends(userId1, userId2);
         }
 
+        public async Task<IEnumerable<FriendListDto>> GetFriendLists()
+        {
+            return await _friendListDAO.GetFriendLists();
+        }
+
         public async Task<List<User>> GetFriendsByUsername(Guid userId, string username)
         {
             // Step 1: Use a DAO to get friend IDs
             var friendIds = await _friendListDAO.GetFriendIdsForUser(userId);
             // Step 2: Use another DAO to get the User objects for those IDs
             return await _userDAO.GetUsersByIdsAndUsername(friendIds, username);
+        }
+
+        public async Task<bool> RemoveFriendShip(Guid userId1, Guid userId2)
+        {
+            return await _friendListDAO.RemoveFriendShip(userId1, userId2);
         }
 
         public async Task Unfriend(Guid userId1, Guid userId2)

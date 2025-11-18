@@ -38,5 +38,10 @@ namespace Services
         {
             return _messageRepository.GetConversationHistory(userId1, userId2);
         }
+
+        public async Task<IEnumerable<BusinessObjects.Dto.MessageDto>> GetMessages()
+        {
+            return await _messageRepository.GetMessages();
+        }
     }
 }

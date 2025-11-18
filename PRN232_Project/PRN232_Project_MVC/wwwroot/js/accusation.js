@@ -2,6 +2,7 @@
 const searchBox = document.querySelector('.search-box');
 const filterSelect = document.querySelectorAll('.filter-select');
 const pagination = document.querySelector('.pagination');
+const excelBtn = document.querySelector('#excelBtn');
 let status, category, otherFilter;
 
 const json = JSON.parse(accusations);
@@ -13,6 +14,15 @@ const priorityMap = new Map([
     ['medium', 2],
     ['high', 3]
 ]);
+
+const accusationsMap = new Map(json.map(a => [a.AccusationId, a]));
+
+const detailModalEl = document.getElementById('accusationDetailModal');
+const detailModal = new bootstrap.Modal(detailModalEl);
+const confirmModalEl = document.getElementById('confirmActionModal');
+const confirmModal = new bootstrap.Modal(confirmModalEl);
+const confirmBtn = document.querySelector('#confirmActionModal #confirm-doit')
+
 
 loadPagination();
 
@@ -45,6 +55,30 @@ filterSelect.forEach(item => {
         loadTbody(jsonFilter);
         jsonFilter = json;
     });
+});
+
+excelBtn.addEventListener("click", () => {
+    let excelArray = new Array();
+
+    json.forEach(item => {
+        excelArray.push({
+            AccusationId: item.AccusationId,
+            AccusedId: item.AccusedId,
+            ReportedId: item.ReportedId,
+            Time: item.CreatedAt,
+            Descriptions: item.Descriptions,
+            ReviewAt: item.ReviewAt,
+            ReviewedBy: item.ReviewedBy,
+            Status: item.Status
+        });
+    })
+
+    const worksheet = XLSX.utils.json_to_sheet(excelArray);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    // Xuất file Excel
+    XLSX.writeFile(workbook, "accusations.xlsx");
 });
 
 function loadTbody(list) {
@@ -188,3 +222,82 @@ function showPage(page) {
         pagination.innerHTML += '<button onclick="showPage(' + Number(page + 1) + ')">Sau →</button>';
     }
 }
+
+
+// wire review buttons
+document.querySelectorAll('.btn-review').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr');
+        const id = parseInt(tr.dataset.id, 10);
+        const acc = accusationsMap.get(id);
+        if (!acc) return;
+
+        document.getElementById('accusationDetailLabel').textContent = `Chi tiết tố cáo #${id}`;
+        document.getElementById('detail-id').textContent = `#${id}`;
+        document.getElementById('detail-reported').textContent = `${acc.Reported?.Username ?? acc.Reported?.username ?? ''} (${acc.Reported?.Email ?? acc.Reported?.email ?? ''})`;
+        document.getElementById('detail-accused').textContent = `${acc.Accused?.Username ?? acc.Accused?.username ?? ''} (${acc.Accused?.Email ?? acc.Accused?.email ?? ''})`;
+        document.getElementById('detail-category').textContent = acc.Category ?? '';
+        document.getElementById('detail-descriptions').textContent = acc.Descriptions ?? '';
+        document.getElementById('detail-status').textContent = acc.Status ?? '';
+        document.getElementById('detail-createdat').textContent = acc.CreatedAt ?? '';
+        document.getElementById('detail-resolution').textContent = acc.ResolutionNote ?? '';
+
+        detailModal.show();
+    });
+});
+
+// variables for confirm flow
+let pendingAction = null;
+let pendingId = null;
+
+function openConfirm(id, action) {
+    pendingId = id;
+    pendingAction = action; // "Resolved" or "Rejected"
+    const msgEl = document.getElementById('confirm-message');
+    const noteGroup = document.getElementById('optional-note-group');
+    document.getElementById('resolution-note').value = '';
+
+    if (action === 'Resolved') {
+        msgEl.textContent = `Bạn có chắc chắn muốn GIẢI QUYẾT tố cáo #${id}? Hành động này sẽ đặt trạng thái là "Resolved".`;
+        noteGroup.style.display = 'block';
+    } else if (action === 'Rejected') {
+        msgEl.textContent = `Bạn có chắc chắn muốn TỪ CHỐI tố cáo #${id}? Hành động này sẽ đặt trạng thái là "Rejected".`;
+        noteGroup.style.display = 'block';
+    } else {
+        msgEl.textContent = `Bạn có chắc chắn muốn thực hiện hành động này cho tố cáo #${id}?`;
+        noteGroup.style.display = 'none';
+    }
+
+    confirmModal.show();
+}
+
+document.querySelectorAll('.btn-resolve').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr');
+        const id = parseInt(tr.dataset.id);
+        openConfirm(id, 'Resolved');
+
+        confirmBtn.addEventListener('click', () => {
+            fetch("/admin/accusations/resolve/" + id, {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(data => console.log(data));
+        });
+    });
+});
+document.querySelectorAll('.btn-reject').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr');
+        const id = parseInt(tr.dataset.id);
+        openConfirm(id, 'Rejected');
+
+        confirmBtn.addEventListener('click', () => {
+            fetch("/admin/accusations/resolve/" + id, {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(data => console.log(data));
+        });
+    });
+});

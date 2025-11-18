@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BusinessObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Services.DTOs;
@@ -39,6 +40,12 @@ namespace PRN232_Project_API.Controllers
             var currentUserId = GetCurrentUserId();
             var history = await _messageService.GetConversationAsync(currentUserId, friendId);
             return Ok(history);
+        }
+
+        [HttpGet("messages")]
+        public async Task<IActionResult> GetAllMessages()
+        {
+            return Ok(await _messageService.GetMessages());
         }
     }
 }

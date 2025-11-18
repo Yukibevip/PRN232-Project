@@ -14,5 +14,6 @@ namespace PRN232_Project_MVC.ServicesMVC.Interfaces
         public Task<bool> Add(Accusation accusation);
         public Task<bool> Update(Accusation accusation);
         public Task<bool> Delete(int id);
+        public Task<bool> ResolveAccusation(int id);
     }
 }

@@ -12,5 +12,6 @@ namespace Services.Interfaces
     {
         Task CreateMessageAsync(Guid senderId, SendMessageDto messageDto);
         Task<List<Message>> GetConversationAsync(Guid userId1, Guid userId2);
+        Task<IEnumerable<BusinessObjects.Dto.MessageDto>> GetMessages();
     }
 }

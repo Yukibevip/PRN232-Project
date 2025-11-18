@@ -46,5 +46,12 @@ namespace PRN232_Project_MVC.ServicesMVC
             var response = await _httpClient.PutAsJsonAsync($"api/admin/accusations/{accusation.AccusationId}", accusation);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> ResolveAccusation(int id)
+        {
+            var response = await _httpClient.PostAsync($"api/admin/accusations/resolve/{id}", null);
+            return response.IsSuccessStatusCode;
+
+        }
     }
 }
