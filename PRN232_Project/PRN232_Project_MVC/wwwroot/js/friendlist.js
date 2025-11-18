@@ -9,9 +9,6 @@ const json1 = JSON.parse(friendlists);
 const json2 = JSON.parse(friendinvitations);
 const json4 = JSON.parse(messages);
 let json = [];
-console.log(json1);
-console.log(json2);
-console.log(json4);
 
 json = json.concat(json1.map(item => ({
     UserId1: item.UserId1,
@@ -31,11 +28,14 @@ json = json.concat(json2.map(item => ({
     User2: item.Receiver
 })));
 
+let numPage = Math.ceil(json.length / 5);
 let jsonFilter = json;
 console.log(jsonFilter);
 
+loadPagination();
 
-////let numPage = Math.ceil(json.length / 5);
+pagination.innerHTML = '<button disabled>← Trước</button>' + pagination.innerHTML;
+pagination.innerHTML += '<button onclick="showPage(2)">Sau →</button>';
 
 
 filterSelect.forEach(item => {
@@ -257,3 +257,30 @@ confirmBtn.addEventListener('click', async () => {
 
 // initial render
 loadTbody(json);
+
+function loadPagination() {
+    pagination.innerHTML = '';
+    for (let i = 1; i <= numPage; i++) {
+        pagination.innerHTML += '<button class="active" onclick="showPage(' + i + ')">' + i + '</button>';
+    }
+}
+
+function paginate(array, page, limit) {
+    return array.slice((page - 1) * limit, page * limit);
+}
+
+function showPage(page) {
+    let items = paginate(jsonFilter, page, 5);
+    loadTbody(items);
+    loadPagination();
+    if (page == 1) {
+        pagination.innerHTML = '<button disabled>← Trước</button>' + pagination.innerHTML;
+        pagination.innerHTML += '<button onclick="showPage(2)">Sau →</button>';
+    } else if (page == numPage) {
+        pagination.innerHTML = '<button onclick="showPage(' + Number(page - 1) + ')">← Trước</button>' + pagination.innerHTML;
+        pagination.innerHTML += '<button disabled>Sau →</button>';
+    } else {
+        pagination.innerHTML = '<button onclick="showPage(' + Number(page - 1) + ')">← Trước</button>' + pagination.innerHTML;
+        pagination.innerHTML += '<button onclick="showPage(' + Number(page + 1) + ')">Sau →</button>';
+    }
+}

@@ -2,13 +2,12 @@
 const searchBox = document.querySelector('.search-box');
 const filterSelect = document.querySelectorAll('.filter-select');
 const excelBtn = document.querySelector('#excelBtn');
-//const pagination = document.querySelector('.pagination');
+const loadMoreBtn = document.querySelector('#loadMoreBtn');
 let action, timeFilter, dateNow, dateNowMilisec;
-
+let clickTimes = 1;
 
 const json = JSON.parse(logs);
-//let numPage = Math.ceil(json.length / 5);
-let jsonFilter = json;
+let jsonFilter = json.slice(clickTimes * 5, (clickTimes + 1) * 5);
 console.log(jsonFilter);
 
 filterSelect.forEach(item => {
@@ -63,8 +62,19 @@ excelBtn.addEventListener("click", () => {
     XLSX.writeFile(workbook, "logs.xlsx");
 });
 
+loadMoreBtn.addEventListener("click", () => {
+    console.log("hello");
+    clickTimes++;
+    let aray = json.slice(clickTimes * 5, (clickTimes + 1) * 5);
+    if (aray.length > 0) 
+    {
+        console.log("hi");
+        jsonFilter.concat()
+    }
+});
+
 function loadTbody(list) {
-    tbody.innerHTML = '';
+    tbody.innerHTML = '<div class="timeline-line"></div>\n';
 
     list.forEach(trElement => {
         var item =
