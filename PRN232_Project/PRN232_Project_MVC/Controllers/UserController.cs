@@ -199,6 +199,7 @@ namespace PRN232_Project_MVC.Controllers
             // store minimal user info in session (JSON) and include role
             var sessionUser = new { user.UserId, user.Username, user.FullName, user.UserRole };
             HttpContext.Session.SetString("User", JsonSerializer.Serialize(sessionUser));
+            await _apiService.LoginToDemoAsync(user.UserId);
 
             // Redirect admin to admin users page, regular users to home as before
             if (!string.IsNullOrEmpty(user.UserRole) && user.UserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))

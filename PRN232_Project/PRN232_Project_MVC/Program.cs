@@ -1,4 +1,4 @@
-using DataAccessObjects;
+﻿using DataAccessObjects;
 using Microsoft.EntityFrameworkCore;
 using PRN232_Project_MVC.AutoMapping;
 using PRN232_Project_MVC.Hubs;
@@ -59,17 +59,17 @@ namespace PRN232_Project_MVC
             builder.Services.AddSignalR();
 
             // APIService registration (if present)
-            var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7098";
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            // 2. Register your custom handler as a transient service
+
+            // 3. Register your APIService and attach the handler
+            var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7098"; // 👈 Make sure this port is your API port
             builder.Services.AddHttpClient<APIService>(client =>
             {
                 client.BaseAddress = new Uri(apiBase);
             });
 
-            // Register AdminService as a typed HTTP client implementing IAdminService
-            builder.Services.AddHttpClient<IAdminService, AdminService>(client =>
-            {
-                client.BaseAddress = new Uri(apiBase);
-            });
 
             builder.Services.AddHttpClient<PRN232_Project_MVC.ServicesMVC.Interfaces.IAccusationService, PRN232_Project_MVC.ServicesMVC.AccusationService>(client =>
             {

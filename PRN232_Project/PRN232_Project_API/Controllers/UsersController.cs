@@ -26,7 +26,12 @@ namespace PRN232_Project_API.Controllers
             _context = context;
             _userService = userService;
         }
-
+        [HttpPost("login-demo")]
+        public IActionResult DemoLogin([FromBody] Guid userId)
+        {
+            DemoAuthService.Login(userId);
+            return Ok(new { Message = $"Demo user {userId} logged in." });
+        }
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
