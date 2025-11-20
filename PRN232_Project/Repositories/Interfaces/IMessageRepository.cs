@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using BusinessObjects.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace Repositories.Interfaces
     {
         Task SendMessage(Message message);
         Task<List<Message>> GetConversationHistory(Guid userId1, Guid userId2);
+        Task<IEnumerable<MessageDto>> GetMessages();
     }
 }

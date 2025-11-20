@@ -1,4 +1,6 @@
-﻿using BusinessObjects;
+﻿using AutoMapper;
+using BusinessObjects;
+using BusinessObjects.Dto;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,12 @@ namespace DataAccessObjects
     public class MessageDAO
     {
         private readonly CallioTestContext _context;
-        public MessageDAO(CallioTestContext context) { _context = context; }
+        private readonly IMapper _mapper;
+        public MessageDAO(CallioTestContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
         public Task Add(Message message)
         {
@@ -27,6 +34,12 @@ namespace DataAccessObjects
                              (m.SenderId == userId2 && m.ReceiverId == userId1))
                 .OrderBy(m => m.SentAt) // Order messages chronologically
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<MessageDto>> GetMessages()
+        {
+            var result = _mapper.Map<IEnumerable<Message>, IEnumerable<MessageDto>>(await _context.Messages.ToListAsync());
+            return result;
         }
     }
 }

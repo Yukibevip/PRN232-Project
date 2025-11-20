@@ -1,10 +1,11 @@
 using DataAccessObjects;
 using Microsoft.EntityFrameworkCore;
-using PRN232_Project_API.Services;
+using PRN232_Project_API.AutoMapping;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
 using Services.Interfaces;
+using PRN232_Project_API;
 
 namespace PRN232_Project_API
 {
@@ -14,10 +15,10 @@ namespace PRN232_Project_API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // optional: load configuration file
+            // Load configuration
             builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
-            // Add services to the container.
+            // Add services
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -31,17 +32,19 @@ namespace PRN232_Project_API
 /* 3. */    builder.Services.AddDbContext<CallioTestContext>(options =>
                 options.UseSqlServer(connectionString));
 
+            builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
+
             // Register DAOs (they depend on CallioTestContext)
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<BlockListDAO>();
-            builder.Services.AddScoped<AccusationDAO>();
             builder.Services.AddScoped<FriendListDAO>();
             builder.Services.AddScoped<FriendInvitationDAO>();
             builder.Services.AddScoped<LogDAO>();
             builder.Services.AddScoped<MessageDAO>();
+            builder.Services.AddScoped<BlockListDAO>();
             // add other DAOs here if you have them
 
-            // Register repositories (they depend on DAOs)
+            // Register repositories
             builder.Services.AddScoped<IAccusationRepository, AccusationRepository>();
             builder.Services.AddScoped<IBlockListRepository, BlockListRepository>();
             builder.Services.AddScoped<IFriendInvitationRepository, FriendInvitationRepository>();
@@ -49,6 +52,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogRepository, LogRepository>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IBlockListRepository, BlockListRepository>();
 
             // Register services
             builder.Services.AddScoped<IAccusationService, AccusationService>();
@@ -57,7 +61,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<QIUserService, QUserService>();
+            builder.Services.AddScoped<IBlockListService, BlockListService>();
 
 
             // Admin service (typed http client) if needed
@@ -65,25 +69,25 @@ namespace PRN232_Project_API
             builder.Services.AddSignalR();
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAllOrigins",
-                    policy =>
-                    {
-                        policy.AllowAnyOrigin() // Allows requests from any address
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
-                    });
+                options.AddPolicy("AllowMvcApp",
+                    policy => policy
+                        .WithOrigins("https://localhost:7180") // MVC app URL
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials() // Required for SignalR
+                );
             });
-            //db connection
-            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
-            builder.Services.AddDbContext<CallioTestContext>(options =>
-            options.UseSqlServer(connectionString));
-            //end db connection
+            // SignalR
+            builder.Services.AddSignalR();
+
+            
             // Add Swagger for API testing
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             // End Swagger configuration
             var app = builder.Build();
 
+            // Configure middleware
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -100,8 +104,13 @@ namespace PRN232_Project_API
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseCors("AllowMvcApp");
+
             app.MapControllers();
-            app.MapHub<ChatHub>("/chatHub"); 
+
+            // Map SignalR hub
+            app.MapHub<ChatHub>("/chatHub");
+
             app.Run();
         }
     }

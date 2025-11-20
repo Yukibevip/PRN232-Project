@@ -1,11 +1,13 @@
 ﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
+
 using Services;
-using Services.Interfaces; // Đảm bảo bạn đang sử dụng Interface
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Services.Interfaces;
+using System.Linq;
+using PRN232_Project_MVC.Models;
 
 namespace PRN232_Project_MVC.Controllers
 {
@@ -14,9 +16,29 @@ namespace PRN232_Project_MVC.Controllers
     {
         private readonly IAdminService _adminService;
         private readonly APIService _apiService;
-        public AdminController(IAdminService adminService, APIService aPIService) // Sử dụng Interface
+        private readonly ServicesMVC.Interfaces.IAccusationService _accusationService;
+        private readonly ServicesMVC.Interfaces.IFriendListService _friendListService;
+        private readonly ServicesMVC.Interfaces.IFriendInvitationService _friendInvitationServices;
+        private readonly ServicesMVC.Interfaces.IBlockListService _blockListServices;
+        private readonly ServicesMVC.Interfaces.IMessageService _messageServices;
+        private readonly ServicesMVC.Interfaces.ILogService _logServices;
+
+        public AdminController(IAdminService adminService, 
+                                ServicesMVC.Interfaces.IAccusationService accusationService, 
+                                ServicesMVC.Interfaces.IFriendListService friendListService, 
+                                ServicesMVC.Interfaces.IFriendInvitationService friendInvitationService, 
+                                ServicesMVC.Interfaces.IBlockListService blockListService,
+                                ServicesMVC.Interfaces.IMessageService messageService,
+                                ServicesMVC.Interfaces.ILogService logServices,
+                                APIService aPIService)
         {
             _adminService = adminService;
+            _accusationService = accusationService;
+            _friendListService = friendListService;
+            _friendInvitationServices = friendInvitationService;
+            _blockListServices = blockListService;
+            _messageServices = messageService;
+            _logServices = logServices;
             _apiService = aPIService;
         }
 
@@ -25,19 +47,81 @@ namespace PRN232_Project_MVC.Controllers
             return RedirectToAction("Users"); // Chuyển hướng đến trang Users làm trang chính
         }
 
-        public IActionResult Accusations()
+        [HttpGet("accusations")]
+        public async Task<IActionResult> Accusations()
         {
-            return View();
+            var accusations = await _accusationService.GetAll();
+            return View(accusations);
         }
 
-        public IActionResult Friendlist()
+        [HttpPost("accusations/resolve/{id}")]
+        public async Task<IActionResult> ResolveAccusation(int id)
         {
-            return View();
+            var success = await _accusationService.ResolveAccusation(id);
+            if (success)
+            {
+                TempData["Success"] = "Accusation resolved successfully.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to resolve accusation.";
+            }
+            return RedirectToAction("Accusations");
         }
 
-        public IActionResult Logs()
+        [HttpGet("friendlist")]
+        public async Task<IActionResult> Friendlist()
         {
-            return View();
+            var friendlists = await _friendListService.GetFriendLists();
+            var friendinvitations = await _friendInvitationServices.GetInvitations();
+            var blocklists = await _blockListServices.GetBlockLists();
+            var messages = await _messageServices.GetMessages();
+
+            FriendListViewModel model = new FriendListViewModel
+            {
+                FriendLists = friendlists,
+                FriendInvitations = friendinvitations,
+                BlockLists = blocklists,
+                Messages = messages
+            };
+            return View(model);
+        }
+
+        [HttpPost("friendlist/remove")]
+        public async Task<IActionResult> DeleteFriendList(Guid user1Id, Guid user2Id)
+        {
+            var success = await _friendListService.RemoveFriendShip(user1Id, user2Id);
+            if (success)
+            {
+                TempData["Success"] = "Friend list entry deleted successfully.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to delete friend list entry.";
+            }
+            return RedirectToAction("Friendlist");
+        }
+
+        [HttpPost("friendinvitation/remove")]
+        public async Task<IActionResult> DeleteFriendInvitation(Guid user1Id, Guid user2Id)
+        {
+            var success = await _friendInvitationServices.RemoveFriendInvitation(user1Id, user2Id);
+            if (success)
+            {
+                TempData["Success"] = "Friend list entry deleted successfully.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to delete friend list entry.";
+            }
+            return RedirectToAction("Friendlist");
+        }
+
+        [HttpGet("logs")]
+        public async Task<IActionResult> LogsAsync()
+        {
+            var result = await _logServices.GetLogs();
+            return View(result);
         }
 
         [HttpGet("Users")]
@@ -48,7 +132,7 @@ namespace PRN232_Project_MVC.Controllers
 
             if (users == null)
             {
-                users = new List<User>();
+                users = new List<BusinessObjects.User>();
                 ViewData["Error"] = "Không thể tải danh sách người dùng.";
             }
 
@@ -62,7 +146,7 @@ namespace PRN232_Project_MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddUser(string username, string email, string fullName, string password, string gender, string userRole)
         {
-            var user = new User
+            var user = new BusinessObjects.User
             {
                 UserId = Guid.NewGuid(),
                 Username = username ?? string.Empty,

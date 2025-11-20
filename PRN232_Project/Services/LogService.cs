@@ -1,4 +1,5 @@
-﻿using Repositories.Interfaces;
+﻿using BusinessObjects.Dto;
+using Repositories.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,11 @@ namespace Services
         public LogService(ILogRepository logRepository)
         {
             _logRepository = logRepository;
+        }
+
+        public async Task<IEnumerable<LogDto>> GetLogs()
+        {
+            return await _logRepository.GetLogs();
         }
     }
 }

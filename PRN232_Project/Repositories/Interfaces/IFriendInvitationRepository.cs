@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BusinessObjects;
+using BusinessObjects.Dto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +12,7 @@ namespace Repositories.Interfaces
     {
         Task CreateInvitation(Guid senderId, Guid receiverId);
         Task AcceptInvitation(int invitationId);
+        Task<IEnumerable<FriendInvitationDto>> GetFriendInvitations();
+        Task<bool> RemoveFriendInvitation(Guid userId1, Guid userId2);
     }
 }

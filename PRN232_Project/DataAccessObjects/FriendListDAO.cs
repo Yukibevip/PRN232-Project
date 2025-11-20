@@ -1,4 +1,6 @@
-﻿using BusinessObjects;
+﻿using AutoMapper;
+using BusinessObjects;
+using BusinessObjects.Dto;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,9 +13,11 @@ namespace DataAccessObjects
     public class FriendListDAO
     {
         private readonly CallioTestContext _context;
-        public FriendListDAO(CallioTestContext context)
+        private readonly IMapper _mapper;
+        public FriendListDAO(CallioTestContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
         public Task<bool> AreUsersFriends(Guid userId1, Guid userId2)
         {
@@ -44,6 +48,25 @@ namespace DataAccessObjects
         {
             _context.FriendLists.Add(friendship);
             return _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<FriendListDto>> GetFriendLists()
+        {
+            var result = await _context.FriendLists.Include(f => f.UserId1Navigation).Include(f => f.UserId2Navigation).ToListAsync();
+            var dto = _mapper.Map<IEnumerable<FriendList>, IEnumerable<FriendListDto>>(result);
+            return dto;
+        }
+
+        public async Task<bool> RemoveFriendShip(Guid userId1, Guid userId2)
+        {
+            var friendships = await GetFriendshipRecords(userId1, userId2);
+            if (friendships == null || friendships.Count == 0)
+            {
+                return false;
+            }
+            RemoveFriendshipRange(friendships);
+            await SaveChangesAsync();
+            return true;
         }
     }
 }

@@ -1,4 +1,22 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
+    // SignalR
+    const connection = new signalR.HubConnectionBuilder().withUrl("/videoChatHub?userId=" + userId).build();
+    let targetId;
+    let peer;
+    const servers = {
+        iceServers: [
+            {
+                urls: ['stun:stun1.l.google.com:19302'],
+            },
+            {
+                urls: 'turn:numb.viagenie.ca',
+                username: 'webrtc@live.com',
+                credential: 'muazkh'
+            }
+        ],
+        iceCandidatePoolSize: 10,
+    };
+
     // DOM Elements
     const localVideo = document.getElementById('local-video');
     const remoteVideo = document.getElementById('remote-video');
@@ -95,12 +113,91 @@
         const country = countryFilter.options[countryFilter.selectedIndex].text;
         searchingText.textContent = `Searching for a partner... (${gender}, ${country})`;
 
-        setTimeout(() => {
-            searchingOverlay.classList.remove('active');
-            simulateConversation();
-            // TODO: Real app logic to find a new peer
-        }, 2000);
+        searchingOverlay.classList.remove('active');
+        simulateConversation();
+        // TODO: Real app logic to find a new peer
+        connection.invoke("SearchOthers", userId);
     }
+
+    // --- WebRTC and SignalR Setup ---
+    connection.on("ReceivePartnerId", async (fromId, partnerId) => {
+        console.log("Received partner ID: " + partnerId);
+        targetId = fromId;
+
+        peer = new RTCPeerConnection(servers);
+        let remoteStream = new MediaStream();
+
+        peer.onicecandidate = e => {
+            console.log("in ice");
+            if (e.candidate) {
+                console.log("Gửi ICE:", e.candidate);
+                connection.invoke("SendIceCandidate", targetId, JSON.stringify(e.candidate));
+            }
+        };
+
+        peer.ontrack = event => {
+            event.streams[0].getTracks().forEach(track => {
+                remoteStream.addTrack(track);
+            });
+
+            remoteVideo.srcObject = remoteStream;
+        };
+
+        localVideo.srcObject = localStream;
+        localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+        const offer = await peer.createOffer();
+        await peer.setLocalDescription(offer);
+        connection.invoke("SendOffer", targetId, JSON.stringify(offer));
+    });
+
+    connection.on("ReceiveOffer", async (fromId, offer) => {
+        targetId = fromId;
+        console.log("Received offer from " + fromId);
+
+        peer = new RTCPeerConnection(servers);
+        let remoteStream = new MediaStream();
+
+        peer.onicecandidate = e => {
+            console.log("in ice");
+            if (e.candidate) {
+                console.log("Gửi ICE:", e.candidate);
+                connection.invoke("SendIceCandidate", targetId, JSON.stringify(e.candidate));
+            }
+        };
+
+        peer.ontrack = event => {
+            event.streams[0].getTracks().forEach(track => {
+                remoteStream.addTrack(track);
+            });
+
+            remoteVideo.srcObject = remoteStream;
+        };
+
+        localVideo.srcObject = localStream;
+        localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+        await peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
+        const answer = await peer.createAnswer();
+        await peer.setLocalDescription(answer);
+        connection.invoke("SendAnswer", fromId, JSON.stringify(answer));
+    });
+
+    connection.on("ReceiveAnswer", async (fromId, answer) => {
+        console.log("Received answer from " + fromId);
+
+        await peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
+    });
+
+    connection.on("ReceiveIceCandidate", async (fromId, candidate) => {
+        console.log("Received candidate from " + fromId);
+
+        await peer.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
+    });
+
+    connection.on("PartnerDisconnected", async () => {
+        homeBtn.click();
+    });
 
     // --- Event Listeners ---
     muteBtn.addEventListener('click', toggleMic);
@@ -121,6 +218,7 @@
     // --- Initialization ---
     async function initialize() {
         await startMedia();
+        connection.start();
         chatInput.focus();
         simulateConversation();
     }

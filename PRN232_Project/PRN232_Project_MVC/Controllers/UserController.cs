@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using PRN232_Project_MVC.Models;
 using Services.DTOs;
+using BusinessObjects;
 namespace PRN232_Project_MVC.Controllers
 {
     public class UserController : Controller
@@ -17,6 +18,8 @@ namespace PRN232_Project_MVC.Controllers
 
         public IActionResult calling()
         {
+            var user = JsonSerializer.Deserialize<BusinessObjects.User>(HttpContext.Session.GetString("User"));
+            ViewData["userId"] = user.UserId;
             return View();
         }
 
@@ -202,6 +205,7 @@ namespace PRN232_Project_MVC.Controllers
 
             var sessionUser = new { user.UserId, user.Username, user.FullName, user.UserRole };
             HttpContext.Session.SetString("User", JsonSerializer.Serialize(sessionUser));
+            await _apiService.LoginToDemoAsync(user.UserId);
 
             if (!string.IsNullOrEmpty(user.UserRole) && user.UserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
