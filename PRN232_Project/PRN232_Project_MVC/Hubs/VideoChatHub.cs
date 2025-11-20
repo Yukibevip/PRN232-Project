@@ -28,16 +28,6 @@ namespace PRN232_Project_MVC.Hubs
         public async Task SendIceCandidate(string targetConnectionId, string candidate)
             => await Clients.Client(targetConnectionId).SendAsync("ReceiveIceCandidate", Context.ConnectionId, candidate);
 
-        //public async Task UserConnect(string userId)
-        //{
-        //    User user = await _apiService.GetUserByIdAsync(userId);
-
-        //    if (user != null)
-        //    {
-        //        UserList.Add(user);
-        //    }
-        //}
-
         public async Task SearchOthers(string userId)
         {
             var userIdGuid = Guid.Parse(userId);
@@ -70,6 +60,11 @@ namespace PRN232_Project_MVC.Hubs
             {
                 WaitingList.Add(userIdGuid);
             }
+        }
+
+        public async Task SendMessage(string sender, string receiver, string message)
+        {
+            Clients.Client(receiver).SendAsync("ReceiveMessage", sender, receiver, message);
         }
 
         public override async Task OnConnectedAsync()

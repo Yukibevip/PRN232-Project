@@ -2,6 +2,7 @@
     // SignalR
     const connection = new signalR.HubConnectionBuilder().withUrl("/videoChatHub?userId=" + userId).build();
     let targetId;
+    let ourId;
     let peer;
     const servers = {
         iceServers: [
@@ -114,7 +115,7 @@
         searchingText.textContent = `Searching for a partner... (${gender}, ${country})`;
 
         searchingOverlay.classList.remove('active');
-        simulateConversation();
+        //simulateConversation();
         // TODO: Real app logic to find a new peer
         connection.invoke("SearchOthers", userId);
     }
@@ -131,6 +132,7 @@
             console.log("in ice");
             if (e.candidate) {
                 console.log("Gửi ICE:", e.candidate);
+                ourId = JSON.stringify(e.candidate);
                 connection.invoke("SendIceCandidate", targetId, JSON.stringify(e.candidate));
             }
         };
@@ -199,6 +201,10 @@
         homeBtn.click();
     });
 
+    connection.on("ReceiveMessage", async (sender, receiver, message) => {
+        addMessage(message, "remote");
+    });
+
     // --- Event Listeners ---
     muteBtn.addEventListener('click', toggleMic);
     cameraBtn.addEventListener('click', toggleCamera);
@@ -212,6 +218,7 @@
             addMessage(text, 'local');
             chatInput.value = '';
             // TODO: Send message to peer
+            connection.invoke("SendMessage", ourId, targetId, text);
         }
     });
 
@@ -220,7 +227,7 @@
         await startMedia();
         connection.start();
         chatInput.focus();
-        simulateConversation();
+        //simulateConversation();
     }
 
     initialize();
