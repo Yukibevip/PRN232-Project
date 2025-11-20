@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using BusinessObjects;
 using Services.Interfaces;
 using Services;
+using AutoMapper;
+using BusinessObjects.Dto;
 
 namespace PRN232_Project_API.Controllers
 {
@@ -15,10 +17,20 @@ namespace PRN232_Project_API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IUserService _adminService;
+        private readonly IAccusationService _accusationService;
+        private readonly IFriendService _friendService;
+        private readonly IBlockListService _blockListService;
+        private readonly ILogService _logService;
+        private readonly IMapper _mapper;
 
-        public AdminController(IUserService adminService)
+        public AdminController(IUserService adminService, IAccusationService accusationService, IFriendService friendService, IBlockListService blockListService, ILogService logService, IMapper mapper)
         {
             _adminService = adminService;
+            _accusationService = accusationService;
+            _friendService = friendService;
+            _blockListService = blockListService;
+            _logService = logService;
+            _mapper = mapper;
         }
 
         // GET: api/admin/users
@@ -107,6 +119,110 @@ namespace PRN232_Project_API.Controllers
             if (bytes == null || bytes.Length == 0) return NotFound();
 
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "users.xlsx");
+        }
+
+        [HttpGet("accusations")]
+        public async Task<ActionResult<IEnumerable<Accusation>>> GetAccusations()
+        {
+            var accusations = await _accusationService.GetAll();
+            var dtos = _mapper.Map<IEnumerable<AccusationDto>>(accusations);
+            return dtos is null ? NotFound() : Ok(dtos);
+        }
+
+        [HttpGet("accusations/{id}")]
+        public async Task<ActionResult<Accusation>> GetAccusation(int id)
+        {
+            var accusation = await _accusationService.Get(id);
+            return accusation is null ? NotFound() : Ok(accusation);
+        }
+
+        [HttpPost("accusations")]
+        public async Task<ActionResult<Accusation>> CreateAccusation([FromBody] Accusation accusation)
+        {
+            if (accusation == null) return BadRequest();
+            var ok = await _accusationService.Add(accusation);
+            if (!ok) return BadRequest(new { error = "Failed to create accusation." });
+            return CreatedAtAction(nameof(GetAccusation), new { id = accusation.AccusationId }, accusation);
+        }
+
+        [HttpPut("accusations/{id}")]
+        public async Task<IActionResult> UpdateAccusation(int id, [FromBody] Accusation accusation)
+        {
+            if (accusation == null || accusation.AccusationId != id) return BadRequest();
+            var ok = await _accusationService.Update(accusation);
+            if (!ok) return NotFound(new { error = "Accusation not found or update failed." });
+            return Ok();
+        }
+
+        [HttpDelete("accusations/{id}")]
+        public async Task<IActionResult> DeleteAccusation(int id)
+        {
+            var ok = await _accusationService.Delete(id);
+            if (!ok) return NotFound();
+            return Ok();
+        }
+
+        [HttpPost("accusations/resolve/{id}")]
+        public async Task<IActionResult> ResolveAccusation(int id)
+        {
+            if (id <= 0)
+                return BadRequest(new { error = "Invalid accusation ID." });
+
+            var accusation = await _accusationService.Get(id);
+
+            if (accusation == null)
+                return NotFound(new { error = "Accusation not found." });
+
+            if (accusation.Status == "Resolved")
+                return BadRequest(new { error = "Accusation is already resolved." });
+
+            accusation.Status = "Resolved";
+
+            if (await _accusationService.Update(accusation))
+            {
+                return Ok(new { message = "Accusation resolved successfully." });
+            } else
+            {
+                return BadRequest(new { error = "Failed to resolve accusation." });
+            }
+        }
+
+        [HttpGet("friends")]
+        public async Task<IActionResult> GetFriendLists()
+        {
+            return Ok(await _friendService.GetFriendLists());
+        }
+
+        [HttpGet("invitations")]
+        public async Task<IActionResult> GetInvitations()
+        {
+            return Ok(await _friendService.GetFriendInvitations());
+        }
+
+        [HttpGet("blocklists")]
+        public async Task<IActionResult> GetBlockLists()
+        {
+            return Ok(await _blockListService.GetBlockLists());
+        }
+
+        [HttpDelete("friendlist")]
+        public async Task<IActionResult> RemoveFriendship(Guid user1Id, Guid user2Id)
+        {
+            var reuslt = await _friendService.RemoveFriendShip(user1Id, user2Id);
+            return reuslt ? Ok(new { message = "Friendship removed successfully." }) : BadRequest(new { error = "Failed to remove friendship." });
+        }
+
+        [HttpDelete("friendinivtation")]
+        public async Task<IActionResult> RemoveFriendInvitation(Guid user1Id, Guid user2Id)
+        {
+            var reuslt = await _friendService.RemoveFriendInvitation(user1Id, user2Id);
+            return reuslt ? Ok(new { message = "FriendInvitation removed successfully." }) : BadRequest(new { error = "Failed to remove FriendInvitation." });
+        }
+
+        [HttpGet("logs")]
+        public async Task<IActionResult> GetLogs()
+        {
+            return Ok(await _logService.GetLogs());
         }
     }
 }

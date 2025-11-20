@@ -1,6 +1,6 @@
 using DataAccessObjects;
 using Microsoft.EntityFrameworkCore;
-using PRN232_Project_API.Services;
+using PRN232_Project_API.AutoMapping;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
@@ -23,14 +23,26 @@ namespace PRN232_Project_API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // Register DAOs
+            // DB connection (use one registration only)
+            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB")
+                                   ?? builder.Configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("Connection string 'MyCallioDB' or 'DefaultConnection' is not configured.");
+
+            builder.Services.AddDbContext<CallioTestContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
+
+            // Register DAOs (they depend on CallioTestContext)
             builder.Services.AddScoped<UserDAO>();
             builder.Services.AddScoped<BlockListDAO>();
-            builder.Services.AddScoped<AccusationDAO>();
             builder.Services.AddScoped<FriendListDAO>();
             builder.Services.AddScoped<FriendInvitationDAO>();
             builder.Services.AddScoped<LogDAO>();
             builder.Services.AddScoped<MessageDAO>();
+            builder.Services.AddScoped<BlockListDAO>();
+            // add other DAOs here if you have them
 
             // Register repositories
             builder.Services.AddScoped<IAccusationRepository, AccusationRepository>();
@@ -40,6 +52,7 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogRepository, LogRepository>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IBlockListRepository, BlockListRepository>();
 
             // Register services
             builder.Services.AddScoped<IAccusationService, AccusationService>();
@@ -48,6 +61,12 @@ namespace PRN232_Project_API
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IBlockListService, BlockListService>();
+
+
+            // Admin service (typed http client) if needed
+
+            builder.Services.AddSignalR();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowMvcApp",
@@ -61,11 +80,11 @@ namespace PRN232_Project_API
             // SignalR
             builder.Services.AddSignalR();
 
-            // Database connection
-            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
-            builder.Services.AddDbContext<CallioTestContext>(options =>
-                options.UseSqlServer(connectionString));
-
+            
+            // Add Swagger for API testing
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            // End Swagger configuration
             var app = builder.Build();
 
             // Configure middleware

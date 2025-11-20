@@ -1,4 +1,6 @@
-﻿using Repositories.Interfaces;
+﻿using BusinessObjects;
+using BusinessObjects.Dto;
+using Repositories.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -14,6 +16,11 @@ namespace Services
         public BlockListService(IBlockListRepository blockListRepository)
         {
             _blockListRepository = blockListRepository;
+        }
+
+        public async Task<IEnumerable<BlockListDto>> GetBlockLists()
+        {
+            return await _blockListRepository.GetBlockLists();
         }
     }
 }

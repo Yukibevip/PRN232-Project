@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessObjects.Dto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace Services.Interfaces
 {
     public interface ILogService
     {
+        Task<IEnumerable<LogDto>> GetLogs();
     }
 }

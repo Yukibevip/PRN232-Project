@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using BusinessObjects.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,6 @@ namespace Repositories.Interfaces
         Task<bool> IsBlocked(Guid userId1, Guid userId2); // 👈 Add this line
         Task<IEnumerable<User>> GetBlockedUsers(Guid blockerId);
         Task<bool> IsUserBlockedBy(Guid blockerId, Guid blockedId);
+        public Task<IEnumerable<BlockListDto>> GetBlockLists();
     }
 }

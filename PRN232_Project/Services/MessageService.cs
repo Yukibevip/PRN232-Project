@@ -52,5 +52,10 @@
                 ReplyToId = m.ReplyToId
             }).ToList();
         }
+
+        public async Task<IEnumerable<BusinessObjects.Dto.MessageDto>> GetMessages()
+        {
+            return await _messageRepository.GetMessages();
+        }
     }
     }

@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using BusinessObjects.Dto;
 using DataAccessObjects;
 using Repositories.Interfaces;
 using System;
@@ -46,6 +47,16 @@ namespace Repositories
             await _friendListDAO.AddFriendship(friendship1);
             await _friendListDAO.AddFriendship(friendship2);
             await _invitationDAO.Remove(invitation);
+        }
+
+        public async Task<IEnumerable<FriendInvitationDto>> GetFriendInvitations()
+        {
+            return await _invitationDAO.GetFriendInvitations();
+        }
+
+        public async Task<bool> RemoveFriendInvitation(Guid userId1, Guid userId2)
+        {
+            return await _invitationDAO.RemoveFriendInvitation(userId1, userId2);
         }
     }
 }
