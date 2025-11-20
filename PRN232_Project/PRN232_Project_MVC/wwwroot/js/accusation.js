@@ -54,6 +54,60 @@ filterSelect.forEach(item => {
         console.log(jsonFilter);
         loadTbody(jsonFilter);
         jsonFilter = json;
+
+        document.querySelectorAll('.btn-review').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tr = e.target.closest('tr');
+                const id = parseInt(tr.dataset.id, 10);
+                const acc = accusationsMap.get(id);
+                if (!acc) return;
+
+                document.getElementById('accusationDetailLabel').textContent = `Chi tiết tố cáo #${id}`;
+                document.getElementById('detail-id').textContent = `#${id}`;
+                document.getElementById('detail-reported').textContent = `${acc.Reported?.Username ?? acc.Reported?.username ?? ''} (${acc.Reported?.Email ?? acc.Reported?.email ?? ''})`;
+                document.getElementById('detail-accused').textContent = `${acc.Accused?.Username ?? acc.Accused?.username ?? ''} (${acc.Accused?.Email ?? acc.Accused?.email ?? ''})`;
+                document.getElementById('detail-category').textContent = acc.Category ?? '';
+                document.getElementById('detail-descriptions').textContent = acc.Descriptions ?? '';
+                document.getElementById('detail-status').textContent = acc.Status ?? '';
+                document.getElementById('detail-createdat').textContent = acc.CreatedAt ?? '';
+                document.getElementById('detail-resolution').textContent = acc.ResolutionNote ?? '';
+
+                detailModal.show();
+            });
+        });
+
+        document.querySelectorAll('.btn-resolve').forEach(btn => {
+            console.log('hello');
+            btn.addEventListener('click', (e) => {
+                const tr = e.target.closest('tr');
+                const id = parseInt(tr.dataset.id);
+                openConfirm(id, 'Resolved');
+
+                confirmBtn.addEventListener('click', () => {
+                    fetch("/admin/accusations/resolve/" + id, {
+                        method: 'POST'
+                    })
+                        .then(res => res.json())
+                        .then(data => console.log(data));
+                });
+            });
+        });
+        document.querySelectorAll('.btn-reject').forEach(btn => {
+            console.log('hello');
+            btn.addEventListener('click', (e) => {
+                const tr = e.target.closest('tr');
+                const id = parseInt(tr.dataset.id);
+                openConfirm(id, 'Rejected');
+
+                confirmBtn.addEventListener('click', () => {
+                    fetch("/admin/accusations/resolve/" + id, {
+                        method: 'POST'
+                    })
+                        .then(res => res.json())
+                        .then(data => console.log(data));
+                });
+            });
+        });
     });
 });
 
@@ -114,9 +168,9 @@ function loadTbody(list) {
             '<td>' + formatDate(new Date(trElement.CreatedAt)) + '</td>\n' +
             '<td>\n' +
             '<div class="action-buttons">\n' +
-            '<button class="btn-action btn-review">Xem xét</button>\n' +
-            '<button class="btn-action btn-resolve">Giải quyết</button>\n' +
-            '<button class="btn-action btn-reject">Từ chối</button>\n' +
+            '<button class="btn-action btn-review btn btn-sm btn-outline-primary">Xem xét</button>\n' +
+            '<button class="btn-action btn-resolve btn btn-sm btn-outline-success">Giải quyết</button>\n' +
+            '<button class="btn-action btn-reject btn btn-sm btn-outline-danger">Từ chối</button>\n' +
             '</div>\n' +
             '</td>\n' +
             '</tr >';
