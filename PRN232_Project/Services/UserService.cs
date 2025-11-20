@@ -57,5 +57,7 @@ namespace Services
 
         public Task<User?> GetUserByIdAsync(Guid id)
             => _repo.GetUserById(id);
+        public Task<bool> UpdateUserAsync(User user)
+        => _repo.UpdateUserAsync(user);
     }
 }

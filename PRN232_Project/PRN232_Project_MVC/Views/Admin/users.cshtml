@@ -549,16 +549,35 @@
                                             var status = (user.Status ?? "Active").ToLower();
                                             var badgeClass = "active";
                                             if (status == "suspended") { badgeClass = "suspended"; }
-                                            else if (status == "banned") { badgeClass = "banned"; }
                                         }
                                         <span class="badge @badgeClass">@Html.DisplayFor(modelItem => user.Status)</span>
                                     </td>
                                     <td>@user.UserId.ToString().Substring(0, 8)</td>
                                     <td>
                                         <div class="action-buttons">
-                                            
-                                            <button class="btn-action btn-view" disabled title="Not implemented">Chi tiết</button>
-                                            <button class="btn-action btn-edit" disabled title="Not implemented">Sửa</button>
+
+                                            <button type="button" class="btn-action btn-view btn-open-view"
+                                                    data-id="@user.UserId"
+                                                    data-username="@user.Username"
+                                                    data-fullname="@user.FullName"
+                                                    data-email="@user.Email"
+                                                    data-gender="@user.Gender"
+                                                    data-role="@user.UserRole"
+                                                    data-status="@user.Status"
+                                                    data-dob="@user.DateOfBirth"
+                                                    data-avatar="@user.AvatarUrl"
+                                                    data-googleid="@user.GoogleId">
+                                                Chi tiết
+                                            </button>
+                                            <button type="button" class="btn-action btn-edit btn-open-edit"
+                                                    data-id="@user.UserId"
+                                                    data-username="@user.Username"
+                                                    data-fullname="@user.FullName"
+                                                    data-email="@user.Email"
+                                                    data-gender="@user.Gender"
+                                                    data-role="@user.UserRole">
+                                                Sửa
+                                            </button>
 
                                             <form asp-controller="Admin" asp-action="ChangeStatus" method="post" class="action-form">
                                                 <input type="hidden" name="id" value="@user.UserId" />
@@ -574,15 +593,6 @@
                                                     <button type="submit" class="btn-action btn-suspend">Tạm ngưng</button>
                                                 }
                                             </form>
-
-                                            @if (user.Status?.ToLower() != "banned")
-                                            {
-                                                <form asp-controller="Admin" asp-action="BlockUser" method="post" class="action-form" onsubmit="return confirm('Bạn có chắc chắn muốn CHẶN người dùng này?');">
-                                                    <input type="hidden" name="id" value="@user.UserId" />
-                                                    <button type="submit" class="btn-action" style="background:#f59e0b;color:#fff;">Chặn</button>
-                                                    @Html.AntiForgeryToken()
-                                                </form>
-                                            }
 
                                             <form asp-controller="Admin" asp-action="DeleteUser" method="post" class="action-form" onsubmit="return confirm('Xóa người dùng sẽ không thể khôi phục. Bạn có chắc?');">
                                                 <input type="hidden" name="id" value="@user.UserId" />
@@ -652,7 +662,114 @@
             </div>
         </form>
     </div>
+    <div id="editModal" class="modal" aria-hidden="true">
+        <form class="modal-card" asp-controller="Admin" asp-action="UpdateUser" method="post">
+            @Html.AntiForgeryToken()
+            <h3>Cập Nhật Người Dùng</h3>
 
+            <input type="hidden" id="editUserId" name="UserId" />
+
+            <div class="form-row">
+                <label>Username</label>
+                <input id="editUsername" type="text" disabled style="background-color: #f3f4f6;" />
+            </div>
+
+            <div class="form-row">
+                <label for="editEmail">Email</label>
+                <input id="editEmail" name="Email" type="email" required />
+            </div>
+
+            <div class="form-row">
+                <label for="editFullname">Full name</label>
+                <input id="editFullname" name="FullName" type="text" />
+            </div>
+
+            <div class="form-row">
+                <label>Gender</label>
+                <div class="gender-row">
+                    <label><input type="radio" id="genderMale" name="Gender" value="Male" /> Male</label>
+                    <label><input type="radio" id="genderFemale" name="Gender" value="Female" /> Female</label>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label for="editUserRole">Vai trò (Role)</label>
+                <select id="editUserRole" name="UserRole" class="filter-select" style="width:100%;">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button id="cancelEdit" type="button" class="btn-secondary">Hủy</button>
+                <button type="submit" class="btn-primary">Lưu Thay Đổi</button>
+            </div>
+        </form>
+    </div>
+    <div id="viewModal" class="modal" aria-hidden="true">
+        <div class="modal-card">
+            <div class="card-header" style="margin-bottom: 15px;">
+                <h3>Thông Tin Chi Tiết</h3>
+                <span id="closeView" style="cursor:pointer; font-size:24px;">&times;</span>
+            </div>
+
+            <div style="display:flex; justify-content:center; margin-bottom: 20px;">
+                <img id="viewAvatarImg" src="" alt="Avatar" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border: 3px solid #00C2A8; display:none;" />
+                <div id="viewAvatarPlaceholder" class="user-avatar" style="width:100px; height:100px; font-size:36px; display:flex;"></div>
+            </div>
+
+            <div class="form-row">
+                <label>User ID</label>
+                <input id="viewUserId" type="text" readonly style="background-color: #f9fafb; border:none; font-weight:bold;" />
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-row">
+                    <label>Username</label>
+                    <input id="viewUsername" type="text" readonly style="background-color: #f9fafb;" />
+                </div>
+                <div class="form-row">
+                    <label>Role</label>
+                    <input id="viewRole" type="text" readonly style="background-color: #f9fafb;" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Email</label>
+                <input id="viewEmail" type="text" readonly style="background-color: #f9fafb;" />
+            </div>
+
+            <div class="form-row">
+                <label>Họ và Tên</label>
+                <input id="viewFullname" type="text" readonly style="background-color: #f9fafb;" />
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-row">
+                    <label>Giới tính</label>
+                    <input id="viewGender" type="text" readonly style="background-color: #f9fafb;" />
+                </div>
+                <div class="form-row">
+                    <label>Ngày sinh</label>
+                    <input id="viewDob" type="text" readonly style="background-color: #f9fafb;" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Trạng thái</label>
+                <input id="viewStatus" type="text" readonly style="background-color: #f9fafb; color: #00C2A8; font-weight:bold;" />
+            </div>
+
+            <div class="form-row" id="googleIdGroup" style="display:none;">
+                <label>Google ID</label>
+                <input id="viewGoogleId" type="text" readonly style="background-color: #f9fafb; font-size:12px;" />
+            </div>
+
+            <div class="modal-actions">
+                <button id="btnCloseView" type="button" class="btn-primary">Đóng</button>
+            </div>
+        </div>
+    </div>
     <script>
         (function () {
             const btnAddUser = document.getElementById('btnAddUser');
@@ -671,15 +788,112 @@
                     addModal.classList.remove('show');
                 });
             }
-            
+            // --- CODE MỚI CHO EDIT MODAL ---
+        const editModal = document.getElementById('editModal');
+        const cancelEdit = document.getElementById('cancelEdit');
+        const editButtons = document.querySelectorAll('.btn-open-edit');
+
+        // Gán sự kiện click cho tất cả nút Sửa
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Lấy dữ liệu từ data attributes
+                const id = this.getAttribute('data-id');
+                const username = this.getAttribute('data-username');
+                const fullname = this.getAttribute('data-fullname');
+                const email = this.getAttribute('data-email');
+                const gender = this.getAttribute('data-gender'); // "Male" or "Female"
+                const role = this.getAttribute('data-role');
+
+                // Đổ dữ liệu vào form
+                document.getElementById('editUserId').value = id;
+                document.getElementById('editUsername').value = username;
+                document.getElementById('editFullname').value = fullname;
+                document.getElementById('editEmail').value = email;
+                document.getElementById('editUserRole').value = role;
+
+                // Xử lý Radio button Gender
+                if (gender === 'Female') {
+                    document.getElementById('genderFemale').checked = true;
+                } else {
+                    document.getElementById('genderMale').checked = true;
+                }
+
+                // Hiển thị modal
+                editModal.classList.add('show');
+            });
+        });
+        const viewModal = document.getElementById('viewModal');
+        const closeViewBtn = document.getElementById('closeView');
+        const btnCloseView = document.getElementById('btnCloseView');
+        const viewButtons = document.querySelectorAll('.btn-open-view');
+
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 1. Lấy dữ liệu
+                const id = this.getAttribute('data-id');
+                const username = this.getAttribute('data-username');
+                const fullname = this.getAttribute('data-fullname');
+                const email = this.getAttribute('data-email');
+                const gender = this.getAttribute('data-gender');
+                const role = this.getAttribute('data-role');
+                const status = this.getAttribute('data-status');
+                const dob = this.getAttribute('data-dob');
+                const avatar = this.getAttribute('data-avatar');
+                const googleId = this.getAttribute('data-googleid');
+
+                // 2. Đổ dữ liệu vào Input
+                document.getElementById('viewUserId').value = id;
+                document.getElementById('viewUsername').value = username;
+                document.getElementById('viewFullname').value = fullname || '(Chưa cập nhật)';
+                document.getElementById('viewEmail').value = email;
+                document.getElementById('viewGender').value = gender || 'Unknown';
+                document.getElementById('viewRole').value = role;
+                document.getElementById('viewStatus').value = status || 'Active';
+                document.getElementById('viewDob').value = dob || '(Chưa cập nhật)';
+
+                // 3. Xử lý Avatar
+                const imgEl = document.getElementById('viewAvatarImg');
+                const placeEl = document.getElementById('viewAvatarPlaceholder');
+
+                if (avatar && avatar.length > 0) {
+                    imgEl.src = avatar;
+                    imgEl.style.display = 'block';
+                    placeEl.style.display = 'none';
+                } else {
+                    imgEl.style.display = 'none';
+                    placeEl.style.display = 'flex';
+                    // Tạo chữ cái đầu làm avatar placeholder
+                    const initial = (fullname && fullname.length > 0) ? fullname.charAt(0) : (username ? username.charAt(0) : '?');
+                    placeEl.innerText = initial.toUpperCase();
+                }
+
+                // 4. Xử lý Google ID
+                const googleGroup = document.getElementById('googleIdGroup');
+                if(googleId && googleId.length > 0){
+                    document.getElementById('viewGoogleId').value = googleId;
+                    googleGroup.style.display = 'flex';
+                } else {
+                    googleGroup.style.display = 'none';
+                }
+
+                // 5. Hiển thị Modal
+                viewModal.classList.add('show');
+            });
+        });
+
+        // Sự kiện đóng Modal View
+        function closeViewModal() {
+            viewModal.classList.remove('show');
+        }
+
+        if(closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
+        if(btnCloseView) btnCloseView.addEventListener('click', closeViewModal);
             window.addEventListener('click', function (event) {
                 if (event.target == addModal) {
                     addModal.classList.remove('show');
                 }
             });
 
-            // Cập nhật giá trị filter/search cho form export
-            // (Không cần thiết nếu dùng asp-action và asp-route-q, nhưng để đây cho chắc)
             const btnExport = document.getElementById('btnExport');
             if (btnExport) {
                 btnExport.form.addEventListener('submit', function() {

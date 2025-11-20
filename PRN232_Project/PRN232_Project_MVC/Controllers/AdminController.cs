@@ -1,10 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using BusinessObjects;
+using Services;
 using Services.Interfaces; // Đảm bảo bạn đang sử dụng Interface
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PRN232_Project_MVC.Controllers
 {
@@ -12,10 +13,11 @@ namespace PRN232_Project_MVC.Controllers
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
-
-        public AdminController(IAdminService adminService) // Sử dụng Interface
+        private readonly APIService _apiService;
+        public AdminController(IAdminService adminService, APIService aPIService) // Sử dụng Interface
         {
             _adminService = adminService;
+            _apiService = aPIService;
         }
 
         public IActionResult Index()
@@ -84,7 +86,33 @@ namespace PRN232_Project_MVC.Controllers
 
             return RedirectToAction("users");
         }
+        // Trong AdminController.cs
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUser(User user)
+        {
 
+            var existingUser = await _apiService.GetUserByIdAsync(user.UserId);
+            if (existingUser != null)
+            {
+                existingUser.FullName = user.FullName;
+                existingUser.Email = user.Email;
+                existingUser.Gender = user.Gender;
+                existingUser.UserRole = user.UserRole;
+
+                var result = await _adminService.UpdateUserByAdminAsync(existingUser);
+                if (result)
+                {
+                    TempData["Success"] = "User updated successfully!";
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to update user.";
+                }
+            }
+
+            return RedirectToAction("Users");
+        }
         // POST: /Admin/ChangeStatus
         // Action này xử lý cả "Active" và "Suspended"
         [HttpPost("ChangeStatus")]
