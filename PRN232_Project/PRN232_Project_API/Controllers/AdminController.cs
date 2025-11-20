@@ -67,7 +67,24 @@ namespace PRN232_Project_API.Controllers
             // Return created resource. Attempt to fetch fresh data from service list (best-effort).
             return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
         }
+        // PUT: api/admin/users/{id}
+        [HttpPut("users/{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User user)
+        {
+            if (id != user.UserId)
+            {
+                return BadRequest(new { error = "ID mismatch" });
+            }
 
+            var ok = await _adminService.UpdateUserAsync(user);
+
+            if (!ok)
+            {
+                return NotFound(new { error = "User not found or update failed" });
+            }
+
+            return NoContent(); // Trả về 204 No Content khi update thành công
+        }
         // GET: api/admin/users/{id}
         [HttpGet("users/{id}")]
         public async Task<ActionResult<User>> GetUser(Guid id)

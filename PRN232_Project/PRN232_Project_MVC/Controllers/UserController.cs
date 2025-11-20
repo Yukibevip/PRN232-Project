@@ -196,12 +196,17 @@ namespace PRN232_Project_MVC.Controllers
                 return View("login");
             }
 
-            // store minimal user info in session (JSON) and include role
+            if (string.Equals(user.Status, "Suspended", StringComparison.OrdinalIgnoreCase))
+            {
+                ViewBag.LoginError = "Your account is Suspended. Please contact admin.";
+                return View("login");
+            }
+            // ------------------------------
+
             var sessionUser = new { user.UserId, user.Username, user.FullName, user.UserRole };
             HttpContext.Session.SetString("User", JsonSerializer.Serialize(sessionUser));
             await _apiService.LoginToDemoAsync(user.UserId);
 
-            // Redirect admin to admin users page, regular users to home as before
             if (!string.IsNullOrEmpty(user.UserRole) && user.UserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("users", "Admin");

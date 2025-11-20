@@ -120,5 +120,7 @@ namespace Services
                 AvatarUrl = u.AvatarUrl
             });
         }
+        public Task<bool> UpdateUserAsync(User user)
+        => _repo.UpdateUserAsync(user);
     }
 }

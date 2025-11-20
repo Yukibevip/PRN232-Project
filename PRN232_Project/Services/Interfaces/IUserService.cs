@@ -30,5 +30,7 @@ namespace Services.Interfaces
         public Task<bool> IsChatBlockedAsync(Guid userId1, Guid userId2);
         Task<IEnumerable<UserProfileDto>> GetBlockedUsersAsync(Guid blockerId);
 
+        Task<bool> UpdateUserAsync(User user);
+
     }
 }

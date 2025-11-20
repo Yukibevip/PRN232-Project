@@ -1,6 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
+
+using Services;
+using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Services.Interfaces;
 using System.Linq;
@@ -12,6 +15,7 @@ namespace PRN232_Project_MVC.Controllers
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly APIService _apiService;
         private readonly ServicesMVC.Interfaces.IAccusationService _accusationService;
         private readonly ServicesMVC.Interfaces.IFriendListService _friendListService;
         private readonly ServicesMVC.Interfaces.IFriendInvitationService _friendInvitationServices;
@@ -25,7 +29,8 @@ namespace PRN232_Project_MVC.Controllers
                                 ServicesMVC.Interfaces.IFriendInvitationService friendInvitationService, 
                                 ServicesMVC.Interfaces.IBlockListService blockListService,
                                 ServicesMVC.Interfaces.IMessageService messageService,
-                                ServicesMVC.Interfaces.ILogService logServices)
+                                ServicesMVC.Interfaces.ILogService logServices,
+                                APIService aPIService)
         {
             _adminService = adminService;
             _accusationService = accusationService;
@@ -34,6 +39,7 @@ namespace PRN232_Project_MVC.Controllers
             _blockListServices = blockListService;
             _messageServices = messageService;
             _logServices = logServices;
+            _apiService = aPIService;
         }
 
         public IActionResult Index()
@@ -164,7 +170,33 @@ namespace PRN232_Project_MVC.Controllers
 
             return RedirectToAction("users");
         }
+        // Trong AdminController.cs
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUser(User user)
+        {
 
+            var existingUser = await _apiService.GetUserByIdAsync(user.UserId);
+            if (existingUser != null)
+            {
+                existingUser.FullName = user.FullName;
+                existingUser.Email = user.Email;
+                existingUser.Gender = user.Gender;
+                existingUser.UserRole = user.UserRole;
+
+                var result = await _adminService.UpdateUserByAdminAsync(existingUser);
+                if (result)
+                {
+                    TempData["Success"] = "User updated successfully!";
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to update user.";
+                }
+            }
+
+            return RedirectToAction("Users");
+        }
         // POST: /Admin/ChangeStatus
         // Action này xử lý cả "Active" và "Suspended"
         [HttpPost("ChangeStatus")]

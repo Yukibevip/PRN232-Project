@@ -64,5 +64,11 @@ namespace Services
             if (!resp.IsSuccessStatusCode) return null;
             return await resp.Content.ReadAsByteArrayAsync();
         }
+
+        public async Task<bool> UpdateUserByAdminAsync(User user)
+        {
+            var resp = await _http.PutAsJsonAsync($"api/users/{user.UserId}", user);
+            return resp.IsSuccessStatusCode;
+        }
     }
 }

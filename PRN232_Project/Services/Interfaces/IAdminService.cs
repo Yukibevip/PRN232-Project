@@ -14,5 +14,6 @@ namespace Services.Interfaces
         Task<bool> DeleteUserAsync(Guid userId);
         Task<bool> BlockUserAsync(Guid userId);
         Task<byte[]?> ExportUsersAsync(string? q, string? status);
+        Task<bool> UpdateUserByAdminAsync(User user);
     }
 }

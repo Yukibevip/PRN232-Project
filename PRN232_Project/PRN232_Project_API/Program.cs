@@ -24,12 +24,12 @@ namespace PRN232_Project_API
             builder.Services.AddSwaggerGen();
 
             // DB connection (use one registration only)
-            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB")
+/* 1. */    var connectionString = builder.Configuration.GetConnectionString("MyCallioDB")
                                    ?? builder.Configuration.GetConnectionString("DefaultConnection");
-            if (string.IsNullOrWhiteSpace(connectionString))
+/* 2. */    if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("Connection string 'MyCallioDB' or 'DefaultConnection' is not configured.");
 
-            builder.Services.AddDbContext<CallioTestContext>(options =>
+/* 3. */    builder.Services.AddDbContext<CallioTestContext>(options =>
                 options.UseSqlServer(connectionString));
 
             builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
