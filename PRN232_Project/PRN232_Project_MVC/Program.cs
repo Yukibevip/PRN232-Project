@@ -37,6 +37,7 @@ namespace PRN232_Project_MVC
             builder.Services.AddScoped<PRN232_Project_MVC.ServicesMVC.Interfaces.IBlockListService, PRN232_Project_MVC.ServicesMVC.BlockListService>();
             builder.Services.AddScoped<PRN232_Project_MVC.ServicesMVC.Interfaces.IMessageService, PRN232_Project_MVC.ServicesMVC.MessageService>();
             builder.Services.AddScoped<PRN232_Project_MVC.ServicesMVC.Interfaces.ILogService, PRN232_Project_MVC.ServicesMVC.LogService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IFriendService, FriendService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
@@ -97,6 +98,11 @@ namespace PRN232_Project_MVC
             });
 
             builder.Services.AddHttpClient<PRN232_Project_MVC.ServicesMVC.Interfaces.ILogService, PRN232_Project_MVC.ServicesMVC.LogService>(client =>
+            {
+                client.BaseAddress = new Uri(apiBase);
+            });
+
+            builder.Services.AddHttpClient<IAdminService, AdminService>(client =>
             {
                 client.BaseAddress = new Uri(apiBase);
             });

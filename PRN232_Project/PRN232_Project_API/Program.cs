@@ -80,11 +80,6 @@ namespace PRN232_Project_API
             // SignalR
             builder.Services.AddSignalR();
 
-            // Database connection
-            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
-            builder.Services.AddDbContext<CallioTestContext>(options =>
-                options.UseSqlServer(connectionString));
-
             
             // Add Swagger for API testing
             builder.Services.AddEndpointsApiExplorer();
