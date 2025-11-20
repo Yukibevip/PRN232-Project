@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Services; 
 
 namespace PRN232_Project_API.Controllers
 {
@@ -9,19 +9,16 @@ namespace PRN232_Project_API.Controllers
     {
         protected Guid GetCurrentUserId()
         {
-            //var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            //if (userIdClaim == null)
-            //{
-            //    throw new InvalidOperationException("User ID claim not found in token. Ensure the endpoint is protected with [Authorize].");
-            //}
-            //return Guid.Parse(userIdClaim.Value);
-            return new Guid("exmaple"); // - A - REAL - USER - ID - FROM - YOUR - DATABASE - HERE"
-            // It finds the 'NameIdentifier' claim that the middleware
-            // extracted from the JWT for this specific request.
-            //var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            // Read the ID from our static demo service
+            var userId = DemoAuthService.CurrentUserId;
 
-            // It returns the dynamic ID from the token.
-            //return Guid.Parse(userIdClaim.Value);
+            if (userId == null)
+            {
+                // This will happen if you try to block a user *before* logging in
+                throw new InvalidOperationException("No user is logged in for this demo. Please call the /api/users/login endpoint first.");
+            }
+
+            return userId.Value;
         }
     }
 }

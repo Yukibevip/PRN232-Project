@@ -53,8 +53,7 @@ namespace PRN232_Project_API
             // Register services
             builder.Services.AddScoped<IAccusationService, AccusationService>();
             builder.Services.AddScoped<IBlockListService, BlockListService>();
-            builder.Services.AddScoped<IFriendInvitationService, FriendInvitationService>();
-            builder.Services.AddScoped<IFriendListService, FriendListService>();
+            builder.Services.AddScoped<IFriendService, FriendService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
@@ -63,6 +62,26 @@ namespace PRN232_Project_API
 
             // Admin service (typed http client) if needed
 
+            builder.Services.AddSignalR();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin() // Allows requests from any address
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+            //db connection
+            var connectionString = builder.Configuration.GetConnectionString("MyCallioDB");
+            builder.Services.AddDbContext<CallioTestContext>(options =>
+            options.UseSqlServer(connectionString));
+            //end db connection
+            // Add Swagger for API testing
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            // End Swagger configuration
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -82,6 +101,7 @@ namespace PRN232_Project_API
             app.UseRouting();
             app.UseAuthorization();
             app.MapControllers();
+            app.MapHub<ChatHub>("/chatHub"); 
             app.Run();
         }
     }

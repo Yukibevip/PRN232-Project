@@ -1,4 +1,4 @@
-﻿namespace PRN232_Project_API.DTOs
+﻿namespace Services.DTOs
 {
     public class UserProfileDto
     {
@@ -6,5 +6,6 @@
         public string Username { get; set; }
         public string FullName { get; set; }
         public string? AvatarUrl { get; set; }
+        public bool IsBlocked { get; set; }
     }
 }
